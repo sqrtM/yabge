@@ -1,6 +1,13 @@
+use crate::cpu::registers::Registers;
+
 pub mod flag;
 mod opcode;
 pub mod registers;
+mod instruction;
+
+pub struct CPU {
+    registers: Registers
+}
 
 #[cfg(test)]
 mod tests {
