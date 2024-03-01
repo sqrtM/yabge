@@ -16,7 +16,19 @@ pub(crate) enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Adc {
+        to: Register,
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
     Sub {
+        from: Register,
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
+    Sbc {
         from: Register,
         what: Value,
         cycles: u8,
@@ -53,6 +65,25 @@ impl CPU {
             } => {
                 let result = self.add(self.registers.get(to), what);
                 self.registers.set(to, result);
+                self.registers.f.unset(N);
+                self.clock += cycles as u64;
+                self.program_counter += length.count();
+            }
+            Instruction::Adc {
+                to,
+                what,
+                cycles,
+                length,
+            } => {
+                let carry_flag_value = if self.registers.f.is_set(C) {
+                    Value::EightBit(1)
+                } else {
+                    Value::EightBit(0)
+                };
+                let operand_with_carry = self.add(what, carry_flag_value);
+                let result = self.add(self.registers.get(to), operand_with_carry);
+                self.registers.set(to, result);
+                self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.program_counter += length.count();
             }
@@ -63,6 +94,23 @@ impl CPU {
                 length,
             } => {
                 let result = self.sub(self.registers.get(from), what);
+                self.registers.set(from, result);
+                self.clock += cycles as u64;
+                self.program_counter += length.count();
+            },
+            Instruction::Sbc {
+                from,
+                what,
+                cycles,
+                length,
+            } => {
+                let carry_flag_value = if self.registers.f.is_set(C) {
+                    Value::EightBit(1)
+                } else {
+                    Value::EightBit(0)
+                };
+                let operand_with_carry = self.add(what, carry_flag_value);
+                let result = self.sub(self.registers.get(from), operand_with_carry);
                 self.registers.set(from, result);
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
@@ -75,21 +123,30 @@ impl CPU {
     fn add(&mut self, a: Value, b: Value) -> Value {
         if Self::check_half_carry_add(a, b) {
             self.registers.f.set(H);
+        } else {
+            self.registers.f.unset(H);
         }
         if Self::check_carry_add(a, b) {
             self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
         }
-        return a + b;
+        a + b
     }
 
     fn sub(&mut self, a: Value, b: Value) -> Value {
         if Self::check_half_carry_sub(a, b) {
             self.registers.f.set(H);
+        } else {
+            self.registers.f.unset(H);
         }
         if Self::check_carry_sub(a, b) {
             self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
         }
-        return a - b;
+        self.registers.f.set(N);
+        a - b
     }
 
     fn check_half_carry_add(a: Value, b: Value) -> bool {

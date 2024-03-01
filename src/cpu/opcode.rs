@@ -43,6 +43,43 @@ mod tests {
     }
 
     #[test]
+    fn test_adc_with_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.f.set(C);
+        cpu.registers.set(Register::A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Adc {
+            to: Register::A,
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x62));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
+    }
+
+    #[test]
+    fn test_adc_no_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(Register::A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Adc {
+            to: Register::A,
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x61));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
+    }
+
+    #[test]
     fn test_sub() {
         let mut cpu = CPU::default();
 
@@ -60,5 +97,42 @@ mod tests {
         assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0xD3));
         assert!(!cpu.registers.f.is_set(C));
         assert!(cpu.registers.f.is_set(H));
+    }
+
+    #[test]
+    fn test_sbc_with_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.f.set(C);
+        cpu.registers.set(Register::A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Sbc {
+            from: Register::A,
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x1A));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
+    }
+
+    #[test]
+    fn test_sbc_no_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(Register::A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Sbc {
+            from: Register::A,
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x1B)); 
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
     }
 }
