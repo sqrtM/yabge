@@ -1,101 +1,44 @@
-pub enum Opcode {
-    ADD,
-    ADC,
-    SUB,
-    SBC,
-    AND,
-    CP,
-    DEC,
-    INC,
-    OR,
-    XOR,
-    BIT,
-    RES,
-    SET,
-    SWAP,
-    RL,
-    RLA,
-    RLC,
-    RR,
-    RRA,
-    RRC,
-    RRCA,
-    SLA,
-    SRA,
-    SRL,
-    LD,
-    LDH,
-    CALL,
-    JP,
-    JR,
-    RET,
-    RETI,
-    RST,
-    POP,
-    PUSH,
-    CCF,
-    CPL,
-    DAA,
-    DI,
-    EI,
-    HALT,
-    NOP,
-    SCF,
-    STOP,
-}
+use crate::cpu::instruction::{Instruction, InstructionLength};
+use crate::cpu::registers::Register;
+use crate::cpu::CPU;
 
-impl Opcode {
-    pub fn execute(&self) {
-        match self {
-            Opcode::ADD => {}
-            Opcode::ADC => {}
-            Opcode::SUB => {}
-            Opcode::SBC => {}
-            Opcode::AND => {}
-            Opcode::CP => {}
-            Opcode::DEC => {}
-            Opcode::INC => {}
-            Opcode::OR => {}
-            Opcode::XOR => {}
-            Opcode::BIT => {}
-            Opcode::RES => {}
-            Opcode::SET => {}
-            Opcode::SWAP => {}
-            Opcode::RL => {}
-            Opcode::RLA => {}
-            Opcode::RLC => {}
-            Opcode::RR => {}
-            Opcode::RRA => {}
-            Opcode::RRC => {}
-            Opcode::RRCA => {}
-            Opcode::SLA => {}
-            Opcode::SRA => {}
-            Opcode::SRL => {}
-            Opcode::LD => {}
-            Opcode::LDH => {}
-            Opcode::CALL => {}
-            Opcode::JP => {}
-            Opcode::JR => {}
-            Opcode::RET => {}
-            Opcode::RETI => {}
-            Opcode::RST => {}
-            Opcode::POP => {}
-            Opcode::PUSH => {}
-            Opcode::CCF => {}
-            Opcode::CPL => {}
-            Opcode::DAA => {}
-            Opcode::DI => {}
-            Opcode::EI => {}
-            Opcode::HALT => {}
-            Opcode::NOP => {}
-            Opcode::SCF => {}
-            Opcode::STOP => {}
+impl CPU {
+    pub fn lookup(&self, code: u8) -> Instruction {
+        match code {
+            0x80 => Instruction::Add {
+                to: Register::A,
+                value: self.registers.get(Register::B),
+                cycles: 4,
+                length: InstructionLength::One,
+            },
+            _ => Instruction::Nop,
         }
     }
 }
 
-fn check_overflows(result: u8) -> (bool, bool) {
-    let overflow_on_bit_3 = (result & (1 << 3)) != 0;
-    let overflow_on_bit_7 = (result & (1 << 7)) != 0;
-    (overflow_on_bit_3, overflow_on_bit_7)
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cpu::flag::Flag::{C, H};
+    use crate::cpu::value::Value;
+
+    #[test]
+    fn test_add() {
+        let mut cpu: CPU = Default::default();
+
+        cpu.registers.set(Register::A, Value::EightBit(0x10));
+        cpu.registers.set(Register::B, Value::EightBit(0x20));
+
+        let instruction = Instruction::Add {
+            to: Register::A,
+            value: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x30));
+        assert!(!cpu.registers.f.is_set(C)); // No carry expected
+        assert!(!cpu.registers.f.is_set(H)); // No half carry expected
+    }
 }

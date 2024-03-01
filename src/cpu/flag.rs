@@ -43,4 +43,110 @@ impl FlagRegister {
     pub fn get(&self) -> u8 {
         self.0 >> 4
     }
+
+    pub fn overwrite(&mut self, value: u8) {
+        self.0 = value
+    }
+
+    pub fn check_carry_8_bit(val: u8) -> bool {
+        (val & (1 << 7)) != 0
+    }
+
+    pub fn check_carry_16_bit(val: u16) -> bool {
+        (val & (1 << 15)) != 0
+    }
+
+    pub fn check_half_carry_8_bit(val: u8) -> bool {
+        (val & (1 << 4)) != 0
+    }
+
+    pub fn check_half_carry_16_bit(val: u16) -> bool {
+        (val & (1 << 12)) != 0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cpu::flag::{Flag, FlagRegister};
+
+    #[test]
+    fn test_flag_setting() {
+        let mut flag_register = FlagRegister::default();
+        flag_register.set(Flag::Z);
+        flag_register.set(Flag::C);
+        assert!(flag_register.is_set(Flag::Z));
+        assert!(!flag_register.is_set(Flag::N));
+        assert!(!flag_register.is_set(Flag::H));
+        assert!(flag_register.is_set(Flag::C));
+    }
+
+    #[test]
+    fn test_flag_unset() {
+        let mut flag_register = FlagRegister::default();
+        flag_register.set(Flag::Z);
+        flag_register.set(Flag::C);
+        assert!(flag_register.is_set(Flag::Z));
+        assert!(!flag_register.is_set(Flag::N));
+        assert!(!flag_register.is_set(Flag::H));
+        assert!(flag_register.is_set(Flag::C));
+        flag_register.unset(Flag::Z);
+        assert!(!flag_register.is_set(Flag::Z));
+    }
+
+    #[test]
+    fn test_flag_initial_state() {
+        let flag_register = FlagRegister::default();
+        assert!(!flag_register.is_set(Flag::Z));
+        assert!(!flag_register.is_set(Flag::N));
+        assert!(!flag_register.is_set(Flag::H));
+        assert!(!flag_register.is_set(Flag::C));
+    }
+
+    #[test]
+    fn test_check_carry_8_bit_with_carry() {
+        let result = 0b1000_0000;
+        assert!(FlagRegister::check_carry_8_bit(result));
+    }
+
+    #[test]
+    fn test_check_carry_8_bit_without_carry() {
+        let result = 0b0000_0001;
+        assert!(!FlagRegister::check_carry_8_bit(result));
+    }
+
+    #[test]
+    fn test_check_carry_16_bit_with_carry() {
+        let result = 0b1000_0000_0000_0000;
+        assert!(FlagRegister::check_carry_16_bit(result));
+    }
+
+    #[test]
+    fn test_check_carry_16_bit_without_carry() {
+        let result = 0b0000_0000_0000_0001;
+        assert!(!FlagRegister::check_carry_16_bit(result));
+    }
+
+    #[test]
+    fn test_check_half_carry_flag_8_bit_with_half_carry() {
+        let result = 0b0001_0000;
+        assert!(FlagRegister::check_half_carry_8_bit(result));
+    }
+
+    #[test]
+    fn test_check_half_carry_flag_8_bit_without_half_carry() {
+        let result = 0b0000_0000;
+        assert!(!FlagRegister::check_half_carry_8_bit(result));
+    }
+
+    #[test]
+    fn test_check_half_carry_flag_16_bit_with_half_carry() {
+        let result = 0b0001_0000_0000_0000;
+        assert!(FlagRegister::check_half_carry_16_bit(result));
+    }
+
+    #[test]
+    fn test_check_half_carry_flag_16_bit_without_half_carry() {
+        let result = 0b0000_0000_0000_0000;
+        assert!(!FlagRegister::check_half_carry_16_bit(result));
+    }
 }

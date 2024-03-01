@@ -1,26 +1,55 @@
+use crate::cpu::registers::Register;
+use crate::cpu::value::Value;
 use crate::cpu::CPU;
-use crate::cpu::opcode::Opcode;
 
-pub struct Instruction {
-    pub opcode: Opcode,
-    pub cycles: u8,
+pub(crate) enum Instruction {
+    Load {
+        to: Register,
+        value: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
+    Add {
+        to: Register,
+        value: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
+    Nop,
+}
+
+pub(crate) enum InstructionLength {
+    One,
+    Two,
+    Three,
+}
+
+impl InstructionLength {
+    pub fn count(&self) -> u16 {
+        match self {
+            InstructionLength::One => 1,
+            InstructionLength::Two => 2,
+            InstructionLength::Three => 3,
+        }
+    }
 }
 
 impl CPU {
-    pub fn lookup(code: u8) -> Instruction {
-        match code {
-            0x00 => {
-                Instruction {
-                    opcode: Opcode::NOP,
-                    cycles: 4,
-                }
-            },
-            _ => {
-                Instruction {
-                    opcode: Opcode::NOP,
-                    cycles: 4,
-                }
+    pub fn execute(&mut self, instruction: Instruction) {
+        match instruction {
+            Instruction::Load { .. } => {}
+            Instruction::Add {
+                to,
+                value,
+                cycles,
+                length,
+            } => {
+                let result = self.registers.get(to) + value;
+                self.registers.set(to, result);
+                self.clock += cycles as u64;
+                self.program_counter += length.count();
             }
+            _ => {}
         }
     }
 }
