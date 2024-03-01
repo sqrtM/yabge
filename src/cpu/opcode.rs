@@ -7,7 +7,7 @@ impl CPU {
         match code {
             0x80 => Instruction::Add {
                 to: Register::A,
-                value: self.registers.get(Register::B),
+                what: self.registers.get(Register::B),
                 cycles: 4,
                 length: InstructionLength::One,
             },
@@ -26,19 +26,39 @@ mod tests {
     fn test_add() {
         let mut cpu: CPU = Default::default();
 
-        cpu.registers.set(Register::A, Value::EightBit(0x10));
-        cpu.registers.set(Register::B, Value::EightBit(0x20));
+        cpu.registers.set(Register::A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
 
         let instruction = Instruction::Add {
             to: Register::A,
-            value: cpu.registers.get(Register::B),
+            what: cpu.registers.get(Register::B),
             cycles: 4,
             length: InstructionLength::One,
         };
         cpu.execute(instruction);
 
-        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x30));
-        assert!(!cpu.registers.f.is_set(C)); // No carry expected
-        assert!(!cpu.registers.f.is_set(H)); // No half carry expected
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0x61));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
+    }
+
+    #[test]
+    fn test_sub() {
+        let mut cpu = CPU::default();
+
+        cpu.registers.set(Register::A, Value::EightBit(0xF2));
+        cpu.registers.set(Register::B, Value::EightBit(0x1F));
+
+        let instruction = Instruction::Sub {
+            from: Register::A,
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::A), Value::EightBit(0xD3));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
     }
 }
