@@ -1,4 +1,5 @@
-use crate::cpu::registers::Registers;
+use crate::cpu::registers::{Register, Registers};
+use crate::cpu::value::Value;
 
 pub mod flag;
 mod instruction;
@@ -6,19 +7,37 @@ mod opcode;
 pub mod registers;
 mod value;
 
-#[derive(Default)]
 pub struct CPU {
     registers: Registers,
-    stack_pointer: u16,
+    stack_pointer: Value,
     program_counter: u16,
     clock: u64,
+}
+
+#[derive(Clone, Copy)]
+pub enum MemoryLocation {
+    Register(Register),
+    Pointer(Value),
+    StackPointer
+}
+
+impl Default for CPU {
+    fn default() -> Self {
+        CPU {
+            registers: Default::default(),
+            stack_pointer: Value::SixteenBit(0),
+            program_counter: 0x100,
+            clock: 0,
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::cpu::flag::Flag;
-    use crate::cpu::registers::{Register, Registers};
+    use crate::cpu::registers::Registers;
     use crate::cpu::value::Value;
+    use crate::cpu::Register;
 
     #[test]
     fn test_af() {

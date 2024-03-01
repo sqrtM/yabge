@@ -1,35 +1,34 @@
+use crate::cpu::{CPU, MemoryLocation};
 use crate::cpu::flag::Flag::{C, H, N};
-use crate::cpu::registers::Register;
 use crate::cpu::value::Value;
-use crate::cpu::CPU;
 
 pub(crate) enum Instruction {
     Load {
-        to: Register,
-        value: Value,
+        to: MemoryLocation,
+        what: Value,
         cycles: u8,
         length: InstructionLength,
     },
     Add {
-        to: Register,
+        to: MemoryLocation,
         what: Value,
         cycles: u8,
         length: InstructionLength,
     },
     Adc {
-        to: Register,
+        to: MemoryLocation,
         what: Value,
         cycles: u8,
         length: InstructionLength,
     },
     Sub {
-        from: Register,
+        from: MemoryLocation,
         what: Value,
         cycles: u8,
         length: InstructionLength,
     },
     Sbc {
-        from: Register,
+        from: MemoryLocation,
         what: Value,
         cycles: u8,
         length: InstructionLength,
@@ -56,15 +55,38 @@ impl InstructionLength {
 impl CPU {
     pub fn execute(&mut self, instruction: Instruction) {
         match instruction {
-            Instruction::Load { .. } => {}
+            Instruction::Load {
+                to,
+                what,
+                cycles,
+                length,
+            } => {
+                // Does this work when loading into ram ?
+                match to {
+                    MemoryLocation::Register(reg) => {
+                        self.registers.set(reg, what);
+                    }
+                    MemoryLocation::StackPointer => {
+                        self.stack_pointer = what;
+                    },
+                    _ => panic!("NOT IMPLEMENTED!!!!")
+                };
+                self.clock += cycles as u64;
+                self.program_counter += length.count();
+            }
             Instruction::Add {
                 to,
                 what,
                 cycles,
                 length,
             } => {
-                let result = self.add(self.registers.get(to), what);
-                self.registers.set(to, result);
+                match to {
+                    MemoryLocation::Register(reg) => {
+                        let result = self.add(self.registers.get(reg), what);
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!")
+                };
                 self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.program_counter += length.count();
@@ -81,8 +103,13 @@ impl CPU {
                     Value::EightBit(0)
                 };
                 let operand_with_carry = self.add(what, carry_flag_value);
-                let result = self.add(self.registers.get(to), operand_with_carry);
-                self.registers.set(to, result);
+                match to {
+                    MemoryLocation::Register(reg) => {
+                        let result = self.add(self.registers.get(reg), operand_with_carry);
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!")
+                };
                 self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.program_counter += length.count();
@@ -93,11 +120,16 @@ impl CPU {
                 cycles,
                 length,
             } => {
-                let result = self.sub(self.registers.get(from), what);
-                self.registers.set(from, result);
+                match from {
+                    MemoryLocation::Register(reg) => {
+                        let result = self.sub(self.registers.get(reg), what);
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!")
+                };
                 self.clock += cycles as u64;
                 self.program_counter += length.count();
-            },
+            }
             Instruction::Sbc {
                 from,
                 what,
@@ -110,8 +142,13 @@ impl CPU {
                     Value::EightBit(0)
                 };
                 let operand_with_carry = self.add(what, carry_flag_value);
-                let result = self.sub(self.registers.get(from), operand_with_carry);
-                self.registers.set(from, result);
+                match from {
+                    MemoryLocation::Register(reg) => {
+                        let result = self.sub(self.registers.get(reg), operand_with_carry);
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!")
+                };
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
                 self.program_counter += length.count();

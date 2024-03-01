@@ -16,7 +16,7 @@ pub enum Register {
     HL,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Registers {
     a: u8,
     b: u8,
