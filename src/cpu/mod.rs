@@ -1,4 +1,5 @@
 use crate::cpu::memory_bus::MemoryBus;
+use crate::cpu::registers::Register::PC;
 use crate::cpu::registers::{Register, Registers};
 use crate::cpu::value::Value;
 
@@ -51,6 +52,14 @@ impl CPU {
                 self.memory_bus.write(location, lo);
                 self.memory_bus.write(location + 1, hi);
             }
+        }
+    }
+
+    pub fn immediate_operand(&self, two_bytes: bool) -> Value {
+        if two_bytes {
+            self.read(self.registers.get(PC) + Value::SixteenBit(1), true)
+        } else {
+            self.read(self.registers.get(PC) + Value::SixteenBit(1), false)
         }
     }
 }
