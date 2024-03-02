@@ -18,6 +18,26 @@ pub enum Register {
     PC,
 }
 
+impl Register {
+    pub(crate) fn is_eight_bits(&self) -> bool {
+        match self {
+            Register::A => true,
+            Register::B => true,
+            Register::C => true,
+            Register::D => true,
+            Register::E => true,
+            Register::H => true,
+            Register::L => true,
+            Register::AF => false,
+            Register::BC => false,
+            Register::DE => false,
+            Register::HL => false,
+            Register::SP => false,
+            Register::PC => false,
+        }
+    }
+}
+
 #[derive(Default, Debug, Clone, Copy)]
 pub struct Registers {
     a: u8,

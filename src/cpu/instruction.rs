@@ -33,6 +33,30 @@ pub(crate) enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Inc {
+        what: MemoryLocation,
+        cycles: u8,
+    },
+    Dec {
+        what: MemoryLocation,
+        cycles: u8,
+    },
+    Rlca {
+        what: MemoryLocation,
+        cycles: u8,
+    },
+    Rla {
+        what: MemoryLocation,
+        cycles: u8,
+    },
+    Rrca {
+        what: MemoryLocation,
+        cycles: u8,
+    },
+    Rra {
+        what: MemoryLocation,
+        cycles: u8,
+    },
     Nop,
 }
 
@@ -61,7 +85,6 @@ impl CPU {
                 cycles,
                 length,
             } => {
-                // Does this work when loading into ram ?
                 match to {
                     MemoryLocation::Register(reg) => {
                         self.registers.set(reg, what);
@@ -149,7 +172,42 @@ impl CPU {
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
-            }
+            },
+            Instruction::Inc { what, cycles } => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let result = if reg.is_eight_bits() {
+                            self.add(self.registers.get(reg), Value::EightBit(1))
+                        } else {
+                            self.add(self.registers.get(reg), Value::SixteenBit(1))
+                        };
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
+                };
+                self.registers.f.unset(N);
+                self.clock += cycles as u64;
+                self.registers.inc_pc(1);
+            },
+            Instruction::Dec { what, cycles } => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let result = if reg.is_eight_bits() {
+                            self.sub(self.registers.get(reg), Value::EightBit(1))
+                        } else {
+                            self.sub(self.registers.get(reg), Value::SixteenBit(1))
+                        };
+                        self.registers.set(reg, result);
+                    }
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
+                };
+                self.registers.f.set(N);
+                self.clock += cycles as u64;
+                self.registers.inc_pc(1);
+            },
+                Instruction::Nop => {
+                self.registers.inc_pc(1);
+            },
             _ => {}
         }
     }

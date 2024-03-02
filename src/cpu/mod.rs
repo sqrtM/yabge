@@ -13,6 +13,25 @@ pub struct CPU {
     clock: u64,
 }
 
+impl CPU {
+    pub fn increment(&mut self, location: MemoryLocation) {
+        match location {
+            MemoryLocation::Register(register) => {
+                let value = self.registers.get(register);
+                let incremented_value = match value {
+                    Value::EightBit(val) => Value::EightBit(val.wrapping_add(1)),
+                    Value::SixteenBit(val) => Value::SixteenBit(val.wrapping_add(1)),
+                };
+
+                self.registers.set(register, incremented_value);
+            }
+            MemoryLocation::Pointer(pointer) => {
+                panic!("not implemented!!!")
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub enum MemoryLocation {
     Register(Register),
