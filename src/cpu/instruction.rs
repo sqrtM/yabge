@@ -85,7 +85,7 @@ impl CPU {
                     MemoryLocation::Register(reg) => {
                         self.registers.set(reg, what);
                     }
-                    _ => panic!("NOT IMPLEMENTED!!!!"),
+                    MemoryLocation::Pointer(val) => self.write(val, what),
                 };
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
@@ -103,7 +103,6 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
             }
@@ -126,7 +125,6 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
             }
@@ -181,7 +179,6 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(1);
             }
@@ -226,7 +223,6 @@ impl CPU {
                         panic!("NOT IMPLEMENTED")
                     }
                 }
-                self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
             }
@@ -240,7 +236,7 @@ impl CPU {
 
 #[cfg(test)]
 mod tests {
-    use crate::cpu::flag::Flag::{C, H, N};
+    use crate::cpu::flag::Flag::{C, H, N, Z};
     use crate::cpu::instruction::RotateDirection;
     use crate::cpu::registers::Register;
     use crate::cpu::registers::Register::{A, HL, PC, SP};
@@ -345,6 +341,27 @@ mod tests {
     }
 
     #[test]
+    fn test_sub_to_zero() {
+        let mut cpu = CPU::default();
+
+        cpu.registers.set(A, Value::EightBit(0x50));
+        cpu.registers.set(Register::B, Value::EightBit(0x50));
+
+        let instruction = Instruction::Sub {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x00));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
+        assert!(cpu.registers.f.is_set(Z));
+    }
+
+    #[test]
     fn test_sbc_with_carry() {
         let mut cpu: CPU = Default::default();
         cpu.registers.f.set(C);
@@ -399,7 +416,8 @@ mod tests {
     #[test]
     fn test_inc_sixteen_bit() {
         let mut cpu: CPU = Default::default();
-        cpu.registers.set(Register::BC, Value::SixteenBit(0x1234));
+        cpu.registers
+            .set(Register::BC, Value::SixteenBit(0b1111_1111));
 
         let instruction = Instruction::Inc {
             what: MemoryLocation::Register(Register::BC),
@@ -407,8 +425,13 @@ mod tests {
         };
         cpu.execute(instruction);
 
-        assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1235));
+        assert_eq!(
+            cpu.registers.get(Register::BC),
+            Value::SixteenBit(0b0000_0001_0000_0000)
+        );
+        assert!(cpu.registers.f.is_set(H));
         assert!(!cpu.registers.f.is_set(N));
+        assert!(!cpu.registers.f.is_set(C));
     }
 
     #[test]

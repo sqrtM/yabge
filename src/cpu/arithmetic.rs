@@ -1,4 +1,4 @@
-use crate::cpu::flag::Flag::{C, H, N};
+use crate::cpu::flag::Flag::{C, H, N, Z};
 use crate::cpu::value::Value;
 use crate::cpu::CPU;
 
@@ -14,6 +14,8 @@ impl CPU {
         } else {
             self.registers.f.unset(C);
         }
+        self.check_zero_flag(a + b);
+        self.registers.f.unset(N);
         a + b
     }
 
@@ -29,6 +31,7 @@ impl CPU {
             self.registers.f.unset(C);
         }
         self.registers.f.set(N);
+        self.check_zero_flag(a - b);
         a - b
     }
 
@@ -64,6 +67,8 @@ impl CPU {
         } else {
             self.registers.f.unset(C);
         }
+        self.registers.f.unset(N);
+        self.check_zero_flag(result);
         result
     }
 
@@ -99,31 +104,31 @@ impl CPU {
         } else {
             self.registers.f.unset(C);
         };
+        self.registers.f.unset(N);
+        self.check_zero_flag(result);
         result
+    }
+
+    fn check_zero_flag(&mut self, a: Value) {
+        if a == Value::EightBit(0) || a == Value::SixteenBit(0) {
+            self.registers.f.set(Z)
+        } else {
+            self.registers.f.unset(Z)
+        }
     }
 
     fn check_half_carry_add(a: Value, b: Value) -> bool {
         match (a, b) {
-            (Value::EightBit(_), Value::EightBit(_)) => {
-                (((a & Value::EightBit(0xF)) + (b & Value::EightBit(0xF))) & Value::EightBit(0x10))
-                    == Value::EightBit(0x10)
-            }
-
-            (Value::SixteenBit(_), Value::SixteenBit(_)) => {
-                (((a & Value::SixteenBit(0xFFF)) + (b & Value::SixteenBit(0xFFF)))
-                    & Value::SixteenBit(0x1000))
-                    == Value::SixteenBit(0x1000)
-            }
-            _ => {
-                panic!("Attempting to compare values of different sizes.")
-            }
+            (Value::EightBit(a), Value::EightBit(b)) => (u16::from(a) + u16::from(b)) > 0xF,
+            (Value::SixteenBit(a), Value::SixteenBit(b)) => (u32::from(a) + u32::from(b)) > 0xFF,
+            _ => panic!("Attempting to compare values of different sizes."),
         }
     }
 
     fn check_carry_add(a: Value, b: Value) -> bool {
         match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (u16::from(a) + u16::from(b)) > 255,
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => (u32::from(a) + u32::from(b)) > 65535,
+            (Value::EightBit(a), Value::EightBit(b)) => (u16::from(a) + u16::from(b)) > 0xFF,
+            (Value::SixteenBit(a), Value::SixteenBit(b)) => (u32::from(a) + u32::from(b)) > 0xFFFF,
             _ => panic!("Attempting to compare values of different sizes."),
         }
     }

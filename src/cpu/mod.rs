@@ -39,12 +39,19 @@ impl CPU {
         }
     }
 
-    pub fn write(&mut self, addr: Value, data: u8) {
-        let val = match addr {
+    pub fn write(&mut self, addr: Value, data: Value) {
+        let location = match addr {
             Value::EightBit(a) => a as u16,
             Value::SixteenBit(a) => a,
         };
-        self.memory_bus.write(val, data)
+        match data {
+            Value::EightBit(val) => self.memory_bus.write(location, val),
+            Value::SixteenBit(val) => {
+                let (hi, lo) = split_bytes(val);
+                self.memory_bus.write(location, lo);
+                self.memory_bus.write(location + 1, hi);
+            }
+        }
     }
 }
 
@@ -61,10 +68,9 @@ pub(crate) fn split_bytes(value: u16) -> (u8, u8) {
 #[cfg(test)]
 mod tests {
     use crate::cpu::flag::Flag;
-    use crate::cpu::registers::Register::BC;
     use crate::cpu::registers::Registers;
     use crate::cpu::value::Value;
-    use crate::cpu::{concat_bytes, Register, CPU};
+    use crate::cpu::{concat_bytes, Register};
 
     #[test]
     fn test_af() {
