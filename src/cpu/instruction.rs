@@ -17,8 +17,8 @@ pub(crate) enum JumpCondition {
 }
 
 pub(crate) struct JumpCycles {
-    executed: u8,
-    not_executed: u8,
+    pub(crate) executed: u8,
+    pub(crate) not_executed: u8,
 }
 
 pub(crate) enum Instruction {

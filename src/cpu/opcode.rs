@@ -1,5 +1,7 @@
-use crate::cpu::instruction::{Instruction, InstructionLength, RotateDirection};
-use crate::cpu::registers::Register::{A, B, BC, C, D, DE, HL, SP};
+use crate::cpu::instruction::{
+    Instruction, InstructionLength, JumpCondition, JumpCycles, RotateDirection,
+};
+use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, HL, SP};
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
@@ -148,6 +150,60 @@ impl CPU {
                 cycles: 1,
                 length: InstructionLength::One,
             },
+            // JR s8
+            0x18 => Instruction::Jr {
+                how_far: self.immediate_operand(false),
+                condition: JumpCondition::None,
+                cycles: JumpCycles {
+                    executed: 3,
+                    not_executed: 3,
+                },
+                length: InstructionLength::Two,
+            },
+            // ADD HL, DE
+            0x19 => Instruction::Add {
+                to: MemoryLocation::Register(HL),
+                what: self.registers.get(DE),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD A, (DE)
+            0x1A => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(DE), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // DEC DE
+            0x1B => Instruction::Dec {
+                what: MemoryLocation::Register(DE),
+                cycles: 2,
+            },
+            // INC E
+            0x1C => Instruction::Inc {
+                what: MemoryLocation::Register(E),
+                cycles: 2,
+            },
+            // DEC E
+            0x1D => Instruction::Dec {
+                what: MemoryLocation::Register(E),
+                cycles: 1,
+            },
+            // LD E, d8
+            0x1E => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RRA
+            0x1F => Instruction::Rot {
+                what: MemoryLocation::Register(A),
+                direction: RotateDirection::Right,
+                use_carry: true,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(B),
@@ -162,8 +218,7 @@ impl CPU {
 #[cfg(test)]
 mod test {
     use crate::cpu::flag::Flag;
-    use crate::cpu::flag::Flag::H;
-    use crate::cpu::registers::Register::{A, B, BC, C, DE, HL, SP};
+    use crate::cpu::registers::Register::{A, B, BC, C, DE, HL, PC, SP};
     use crate::cpu::value::Value;
     use crate::cpu::CPU;
 
@@ -414,5 +469,40 @@ mod test {
         }
 
         assert_eq!(cpu.registers.get(A), Value::EightBit(0b0101_0001));
+    }
+
+    #[test]
+    fn test_0x18() {
+        let mut cpu: CPU = Default::default();
+        cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x18));
+        cpu.write(Value::SixteenBit(0x01), Value::EightBit(0xAB));
+        assert_eq!(0xAB, 0b10101011);
+        assert_eq!(0xAB, 171u8);
+        assert_eq!(0b10101011u8 as i8, -85);
+        assert_eq!(0u16.wrapping_sub(85), 65451);
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(cpu.registers.get(PC), Value::SixteenBit(65451));
+    }
+
+    #[test]
+    fn test_0x1F() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b0010_1000));
+        cpu.registers.f.set(Flag::C);
+        cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x1F));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1001_0100));
     }
 }
