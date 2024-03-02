@@ -2,6 +2,7 @@ use crate::cpu::memory_bus::MemoryBus;
 use crate::cpu::registers::{Register, Registers};
 use crate::cpu::value::Value;
 
+mod arithmetic;
 pub mod flag;
 mod instruction;
 mod memory_bus;
@@ -101,21 +102,5 @@ mod tests {
     #[test]
     fn test_merge_registers() {
         assert_eq!(concat_bytes(0xAB, 0xCD), 0xABCD);
-    }
-
-    #[test]
-    fn test_0x01() {
-        let mut cpu: CPU = Default::default();
-        cpu.write(Value::SixteenBit(0x00), 0x01);
-        cpu.write(Value::SixteenBit(0x01), 0xCD);
-        cpu.write(Value::SixteenBit(0x02), 0xAB);
-
-        let val = cpu.read(Value::SixteenBit(0x00), false);
-        if let Value::EightBit(code) = val {
-            let inst = cpu.lookup(code);
-            cpu.execute(inst);
-        }
-
-        assert_eq!(cpu.registers.get(BC), Value::SixteenBit(0xABCD));
     }
 }

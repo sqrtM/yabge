@@ -1,4 +1,4 @@
-use crate::cpu::flag::Flag::{C, H, N};
+use crate::cpu::flag::Flag::{C, N};
 use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
@@ -236,159 +236,283 @@ impl CPU {
             }
         }
     }
+}
 
-    fn add(&mut self, a: Value, b: Value) -> Value {
-        if Self::check_half_carry_add(a, b) {
-            self.registers.f.set(H);
-        } else {
-            self.registers.f.unset(H);
-        }
-        if Self::check_carry_add(a, b) {
-            self.registers.f.set(C);
-        } else {
-            self.registers.f.unset(C);
-        }
-        a + b
-    }
+#[cfg(test)]
+mod tests {
+    use crate::cpu::flag::Flag::{C, H, N};
+    use crate::cpu::instruction::RotateDirection;
+    use crate::cpu::registers::Register;
+    use crate::cpu::registers::Register::{A, HL, PC, SP};
+    use crate::cpu::value::Value;
+    use crate::cpu::MemoryLocation;
 
-    fn sub(&mut self, a: Value, b: Value) -> Value {
-        if Self::check_half_carry_sub(a, b) {
-            self.registers.f.set(H);
-        } else {
-            self.registers.f.unset(H);
-        }
-        if Self::check_carry_sub(a, b) {
-            self.registers.f.set(C);
-        } else {
-            self.registers.f.unset(C);
-        }
-        self.registers.f.set(N);
-        a - b
-    }
+    use super::*;
 
-    fn rol(&mut self, a: Value, use_carry: bool) -> Value {
-        let result = match a {
-            Value::EightBit(_) => {
-                let val = a.rotate_left();
-                if use_carry {
-                    if self.registers.f.is_set(C) {
-                        val | Value::EightBit(0x01)
-                    } else {
-                        val & Value::EightBit(0xFE)
-                    }
-                } else {
-                    val
-                }
-            }
-            Value::SixteenBit(_) => {
-                let val = a.rotate_left();
-                if use_carry {
-                    if self.registers.f.is_set(C) {
-                        val | Value::SixteenBit(0x0001)
-                    } else {
-                        val & Value::SixteenBit(0xFFFE)
-                    }
-                } else {
-                    val
-                }
-            }
+    #[test]
+    fn test_load() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(HL, Value::SixteenBit(0x1234));
+
+        let instruction = Instruction::Load {
+            to: MemoryLocation::Register(SP),
+            what: cpu.registers.get(HL),
+            cycles: 1,
+            length: InstructionLength::One,
         };
-        if Self::check_carry_left_rotate(a) {
-            self.registers.f.set(C);
-        } else {
-            self.registers.f.unset(C);
-        }
-        result
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x1234));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
     }
 
-    fn ror(&mut self, a: Value, use_carry: bool) -> Value {
-        let result = match a {
-            Value::EightBit(_) => {
-                let val = a.rotate_right();
-                if use_carry {
-                    if self.registers.f.is_set(C) {
-                        val | Value::EightBit(0x80)
-                    } else {
-                        val & Value::EightBit(0x7F)
-                    }
-                } else {
-                    val
-                }
-            }
-            Value::SixteenBit(_) => {
-                let val = a.rotate_right();
-                if use_carry {
-                    if self.registers.f.is_set(C) {
-                        val | Value::SixteenBit(0x8000)
-                    } else {
-                        val & Value::SixteenBit(0x7FFF)
-                    }
-                } else {
-                    val
-                }
-            }
+    #[test]
+    fn test_add() {
+        let mut cpu: CPU = Default::default();
+
+        cpu.registers.set(A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+
+        let instruction = Instruction::Add {
+            to: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
         };
-        if Self::check_carry_right_rotate(a) {
-            self.registers.f.set(C);
-        } else {
-            self.registers.f.unset(C);
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x61));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
+    }
+
+    #[test]
+    fn test_adc_with_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.f.set(C);
+        cpu.registers.set(A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Adc {
+            to: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
         };
-        result
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x62));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
     }
 
-    fn check_half_carry_add(a: Value, b: Value) -> bool {
-        match (a, b) {
-            (Value::EightBit(_), Value::EightBit(_)) => {
-                (((a & Value::EightBit(0xF)) + (b & Value::EightBit(0xF))) & Value::EightBit(0x10))
-                    == Value::EightBit(0x10)
-            }
+    #[test]
+    fn test_adc_no_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Adc {
+            to: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
 
-            (Value::SixteenBit(_), Value::SixteenBit(_)) => {
-                (((a & Value::SixteenBit(0xFFF)) + (b & Value::SixteenBit(0xFFF)))
-                    & Value::SixteenBit(0x1000))
-                    == Value::SixteenBit(0x1000)
-            }
-            _ => {
-                panic!("Attempting to compare values of different sizes.")
-            }
-        }
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x61));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
     }
 
-    fn check_carry_add(a: Value, b: Value) -> bool {
-        match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (u16::from(a) + u16::from(b)) > 255,
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => (u32::from(a) + u32::from(b)) > 65535,
-            _ => panic!("Attempting to compare values of different sizes."),
-        }
+    #[test]
+    fn test_sub() {
+        let mut cpu = CPU::default();
+
+        cpu.registers.set(A, Value::EightBit(0xF2));
+        cpu.registers.set(Register::B, Value::EightBit(0x1F));
+
+        let instruction = Instruction::Sub {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0xD3));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(cpu.registers.f.is_set(H));
     }
 
-    fn check_half_carry_sub(a: Value, b: Value) -> bool {
-        match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (a & 0xF) < (b & 0xF),
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => (a & 0xFFF) < (b & 0xFFF),
-            _ => panic!("Attempting to compare values of different sizes."),
-        }
+    #[test]
+    fn test_sbc_with_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.f.set(C);
+        cpu.registers.set(A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Sbc {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x1A));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
     }
 
-    fn check_carry_sub(a: Value, b: Value) -> bool {
-        match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => a < b,
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => a < b,
-            _ => panic!("Attempting to compare values of different sizes."),
-        }
+    #[test]
+    fn test_sbc_no_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0x3E));
+        cpu.registers.set(Register::B, Value::EightBit(0x23));
+        let instruction = Instruction::Sbc {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x1B));
+        assert!(!cpu.registers.f.is_set(C));
+        assert!(!cpu.registers.f.is_set(H));
     }
 
-    fn check_carry_left_rotate(a: Value) -> bool {
-        match a {
-            Value::EightBit(a) => (a & 0x80) != 0,
-            Value::SixteenBit(a) => (a & 0x8000) != 0,
-        }
+    #[test]
+    fn test_inc_eight_bit() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0x3E));
+
+        let instruction = Instruction::Inc {
+            what: MemoryLocation::Register(A),
+            cycles: 4,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x3F));
+        assert!(!cpu.registers.f.is_set(N));
     }
 
-    fn check_carry_right_rotate(a: Value) -> bool {
-        match a {
-            Value::EightBit(a) => (a & 0x01) != 0,
-            Value::SixteenBit(a) => (a & 0x0001) != 0,
-        }
+    #[test]
+    fn test_inc_sixteen_bit() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(Register::BC, Value::SixteenBit(0x1234));
+
+        let instruction = Instruction::Inc {
+            what: MemoryLocation::Register(Register::BC),
+            cycles: 4,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1235));
+        assert!(!cpu.registers.f.is_set(N));
+    }
+
+    #[test]
+    fn test_dec_eight_bit() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0x00));
+
+        let instruction = Instruction::Dec {
+            what: MemoryLocation::Register(A),
+            cycles: 4,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0xFF));
+        assert!(cpu.registers.f.is_set(N));
+    }
+
+    #[test]
+    fn test_dec_sixteen_bit() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(Register::BC, Value::SixteenBit(0x1234));
+
+        let instruction = Instruction::Dec {
+            what: MemoryLocation::Register(Register::BC),
+            cycles: 4,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1233));
+        assert!(cpu.registers.f.is_set(N));
+    }
+
+    #[test]
+    fn test_rotate_right() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0011));
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Right,
+            use_carry: false,
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+        assert!(cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_left() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0011));
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Left,
+            use_carry: false,
+            cycles: 4,
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1000_0111));
+        assert!(cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_right_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0010));
+        cpu.registers.f.set(C);
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Right,
+            use_carry: true,
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+        assert!(!cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_left_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b0100_1000));
+        cpu.registers.f.set(C);
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Left,
+            use_carry: true,
+            cycles: 4,
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1001_0001));
+        assert!(!cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_nop() {
+        let mut cpu: CPU = Default::default();
+        let instruction = Instruction::Nop;
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(PC), Value::SixteenBit(1));
     }
 }
