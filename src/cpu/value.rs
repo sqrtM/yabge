@@ -1,10 +1,12 @@
+use std::ops::Add;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Value {
     EightBit(u8),
     SixteenBit(u16),
 }
 
-impl std::ops::Add<Value> for Value {
+impl Add<Value> for Value {
     type Output = Value;
 
     fn add(self, rhs: Value) -> Value {
@@ -12,6 +14,50 @@ impl std::ops::Add<Value> for Value {
             (Value::EightBit(a), Value::EightBit(b)) => Value::EightBit(a.wrapping_add(b)),
             (Value::SixteenBit(a), Value::SixteenBit(b)) => Value::SixteenBit(a.wrapping_add(b)),
             _ => panic!("Attempted to add values of different sizes"),
+        }
+    }
+}
+
+impl Add<u8> for Value {
+    type Output = Value;
+
+    fn add(self, rhs: u8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_add(rhs)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs as u16)),
+        }
+    }
+}
+
+impl Add<i8> for Value {
+    type Output = Value;
+
+    fn add(self, rhs: i8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_add(rhs as u8)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs as u16)),
+        }
+    }
+}
+
+impl Add<u16> for Value {
+    type Output = Value;
+
+    fn add(self, rhs: u16) -> Value {
+        match self {
+            Value::EightBit(a) => Value::SixteenBit((a as u16).wrapping_add(rhs)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs)),
+        }
+    }
+}
+
+impl Add<i16> for Value {
+    type Output = Value;
+
+    fn add(self, rhs: i16) -> Value {
+        match self {
+            Value::EightBit(a) => Value::SixteenBit((a as u16).wrapping_add(rhs as u16)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs as u16)),
         }
     }
 }

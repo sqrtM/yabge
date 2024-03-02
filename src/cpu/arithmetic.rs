@@ -1,8 +1,17 @@
 use crate::cpu::flag::Flag::{C, H, N, Z};
+use crate::cpu::instruction::JumpCondition;
 use crate::cpu::value::Value;
 use crate::cpu::CPU;
 
 impl CPU {
+    pub(crate) fn should_jump(&self, condition: JumpCondition) -> bool {
+        match condition {
+            JumpCondition::FlagOn(flag) => self.registers.f.is_set(flag),
+            JumpCondition::FlagOff(flag) => !self.registers.f.is_set(flag),
+            JumpCondition::None => true,
+        }
+    }
+
     pub(crate) fn add(&mut self, a: Value, b: Value) -> Value {
         if Self::check_half_carry_add(a, b) {
             self.registers.f.set(H);
@@ -161,5 +170,47 @@ impl CPU {
             Value::EightBit(a) => (a & 0x01) != 0,
             Value::SixteenBit(a) => (a & 0x0001) != 0,
         }
+    }
+}
+
+/// Bit manips to transmute u8/u16 to i16
+/// while maintaining the bit order.
+pub(crate) fn unsigned_to_signed(value: Value) -> i16 {
+    match value {
+        Value::EightBit(a) => {
+            if a & 0x80 != 0 {
+                -((!a).wrapping_add(1) as i8 as i16)
+            } else {
+                a as i16
+            }
+        }
+        Value::SixteenBit(a) => {
+            if a & 0x8000 != 0 {
+                -((!a).wrapping_add(1) as i16)
+            } else {
+                a as i16
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cpu::arithmetic::unsigned_to_signed;
+    use crate::cpu::value::Value;
+
+    #[test]
+    fn test_unsigned_to_signed() {
+        let a = Value::EightBit(0b1011_1101);
+        let b = Value::SixteenBit(0b1000_1100_1110_1111);
+        assert_eq!(a, Value::EightBit(189));
+        assert_eq!(b, Value::SixteenBit(36079));
+
+        let ia = unsigned_to_signed(a);
+        let ib = unsigned_to_signed(b);
+        assert_eq!(ia, -67);
+        assert_eq!(ia as i8, 0b1011_1101u8 as i8);
+        assert_eq!(ib, -29457);
+        assert_eq!(ib, 0b1000_1100_1110_1111u16 as i16);
     }
 }

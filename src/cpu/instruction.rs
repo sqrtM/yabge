@@ -1,10 +1,24 @@
+use crate::cpu::arithmetic::unsigned_to_signed;
+use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::{C, N};
+use crate::cpu::registers::Register::PC;
 use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
 pub(crate) enum RotateDirection {
     Right,
     Left,
+}
+
+pub(crate) enum JumpCondition {
+    FlagOn(Flag),
+    FlagOff(Flag),
+    None,
+}
+
+pub(crate) struct JumpCycles {
+    executed: u8,
+    not_executed: u8,
 }
 
 pub(crate) enum Instruction {
@@ -51,6 +65,18 @@ pub(crate) enum Instruction {
         direction: RotateDirection,
         use_carry: bool,
         cycles: u8,
+        length: InstructionLength,
+    },
+    Jr {
+        how_far: Value,
+        condition: JumpCondition,
+        cycles: JumpCycles,
+        length: InstructionLength,
+    },
+    Jp {
+        to: Value,
+        condition: JumpCondition,
+        cycles: JumpCycles,
         length: InstructionLength,
     },
     Nop,
@@ -223,6 +249,35 @@ impl CPU {
                 }
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
+            }
+            Instruction::Jr {
+                how_far,
+                condition,
+                cycles,
+                length,
+            } => {
+                if self.should_jump(condition) {
+                    let new_location = self.registers.get(PC) + unsigned_to_signed(how_far);
+                    self.registers.set(PC, new_location);
+                    self.clock += cycles.executed as u64;
+                } else {
+                    self.registers.inc_pc(length.count());
+                    self.clock += cycles.not_executed as u64;
+                }
+            }
+            Instruction::Jp {
+                to,
+                condition,
+                cycles,
+                length,
+            } => {
+                if self.should_jump(condition) {
+                    self.registers.set(PC, to);
+                    self.clock += cycles.executed as u64;
+                } else {
+                    self.registers.inc_pc(length.count());
+                    self.clock += cycles.not_executed as u64;
+                }
             }
             Instruction::Nop => {
                 self.clock += 4;
@@ -526,6 +581,44 @@ mod tests {
         cpu.execute(instruction);
         assert_eq!(cpu.registers.get(A), Value::EightBit(0b1001_0001));
         assert!(!cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_jr() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(PC, Value::SixteenBit(0x1234));
+        cpu.registers.f.set(C);
+
+        let instruction = Instruction::Jr {
+            how_far: Value::EightBit(0b1001_1001),
+            condition: JumpCondition::FlagOn(C),
+            cycles: JumpCycles {
+                executed: 2,
+                not_executed: 3,
+            },
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x11CD));
+        assert!(cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_jp() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(PC, Value::SixteenBit(0x1234));
+
+        let instruction = Instruction::Jp {
+            to: Value::SixteenBit(0x5678),
+            condition: JumpCondition::FlagOff(Z),
+            cycles: JumpCycles {
+                executed: 2,
+                not_executed: 3,
+            },
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x5678));
     }
 
     #[test]
