@@ -1,6 +1,6 @@
-use crate::cpu::{CPU, MemoryLocation};
 use crate::cpu::flag::Flag::{C, H, N};
 use crate::cpu::value::Value;
+use crate::cpu::{MemoryLocation, CPU};
 
 pub(crate) enum RotateDirection {
     Right,
@@ -231,6 +231,7 @@ impl CPU {
                 self.registers.inc_pc(length.count());
             }
             Instruction::Nop => {
+                self.clock += 4;
                 self.registers.inc_pc(1);
             }
         }
@@ -271,9 +272,9 @@ impl CPU {
                 let val = a.rotate_left();
                 if use_carry {
                     if self.registers.f.is_set(C) {
-                         val | Value::EightBit(0x01)
+                        val | Value::EightBit(0x01)
                     } else {
-                         val & Value::EightBit(0xFE)
+                        val & Value::EightBit(0xFE)
                     }
                 } else {
                     val

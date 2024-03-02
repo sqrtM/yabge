@@ -1,11 +1,21 @@
 use crate::cpu::instruction::{Instruction, InstructionLength};
 use crate::cpu::registers::Register;
-use crate::cpu::registers::Register::A;
+use crate::cpu::registers::Register::{A, BC, SP};
+use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
     pub fn lookup(&self, code: u8) -> Instruction {
         match code {
+            // NOP
+            0x00 => Instruction::Nop,
+            // LD BC, d16
+            0x01 => Instruction::Load {
+                to: MemoryLocation::Register(BC),
+                what: self.read(self.registers.get(SP) + Value::SixteenBit(1), true),
+                cycles: 3,
+                length: InstructionLength::Three,
+            },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(Register::B),
@@ -28,10 +38,7 @@ mod tests {
 
     #[test]
     fn test_load() {
-        let mut cpu = CPU {
-            registers: Default::default(),
-            clock: 0,
-        };
+        let mut cpu: CPU = Default::default();
         cpu.registers.set(HL, Value::SixteenBit(0x1234));
 
         let instruction = Instruction::Load {

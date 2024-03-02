@@ -1,5 +1,6 @@
 use crate::cpu::flag::FlagRegister;
 use crate::cpu::value::Value;
+use crate::cpu::{concat_bytes, split_bytes};
 
 #[derive(Clone, Copy)]
 pub enum Register {
@@ -69,22 +70,22 @@ impl Registers {
             },
             Value::SixteenBit(v) => match register {
                 Register::AF => {
-                    let (hi, lo) = Self::split_bytes(v);
+                    let (hi, lo) = split_bytes(v);
                     self.a = hi;
                     self.f.overwrite(lo);
                 }
                 Register::BC => {
-                    let (hi, lo) = Self::split_bytes(v);
+                    let (hi, lo) = split_bytes(v);
                     self.b = hi;
                     self.c = lo;
                 }
                 Register::DE => {
-                    let (hi, lo) = Self::split_bytes(v);
+                    let (hi, lo) = split_bytes(v);
                     self.d = hi;
                     self.e = lo;
                 }
                 Register::HL => {
-                    let (hi, lo) = Self::split_bytes(v);
+                    let (hi, lo) = split_bytes(v);
                     self.h = hi;
                     self.l = lo;
                 }
@@ -124,28 +125,18 @@ impl Registers {
     }
 
     pub(crate) fn af(&self) -> u16 {
-        Self::concat_bytes(self.a, self.f.get())
+        concat_bytes(self.a, self.f.get())
     }
 
     pub(crate) fn bc(&self) -> u16 {
-        Self::concat_bytes(self.b, self.c)
+        concat_bytes(self.b, self.c)
     }
 
     pub(crate) fn de(&self) -> u16 {
-        Self::concat_bytes(self.d, self.e)
+        concat_bytes(self.d, self.e)
     }
 
     pub(crate) fn hl(&self) -> u16 {
-        Self::concat_bytes(self.h, self.l)
-    }
-
-    pub(crate) fn concat_bytes(hi: u8, lo: u8) -> u16 {
-        (hi as u16) << 8 | lo as u16
-    }
-
-    pub(crate) fn split_bytes(value: u16) -> (u8, u8) {
-        let high_byte = (value >> 8) as u8;
-        let low_byte = value as u8;
-        (high_byte, low_byte)
+        concat_bytes(self.h, self.l)
     }
 }
