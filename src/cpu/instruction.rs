@@ -2,6 +2,11 @@ use crate::cpu::flag::Flag::{C, H, N};
 use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
+pub(crate) enum RotateDirection {
+    Right,
+    Left,
+}
+
 pub(crate) enum Instruction {
     Load {
         to: MemoryLocation,
@@ -41,21 +46,17 @@ pub(crate) enum Instruction {
         what: MemoryLocation,
         cycles: u8,
     },
-    Rlca {
+    Rot {
         what: MemoryLocation,
+        direction: RotateDirection,
         cycles: u8,
+        length: InstructionLength,
     },
-    Rla {
+    Rotc {
         what: MemoryLocation,
+        direction: RotateDirection,
         cycles: u8,
-    },
-    Rrca {
-        what: MemoryLocation,
-        cycles: u8,
-    },
-    Rra {
-        what: MemoryLocation,
-        cycles: u8,
+        length: InstructionLength,
     },
     Nop,
 }
@@ -172,7 +173,7 @@ impl CPU {
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
-            },
+            }
             Instruction::Inc { what, cycles } => {
                 match what {
                     MemoryLocation::Register(reg) => {
@@ -188,7 +189,7 @@ impl CPU {
                 self.registers.f.unset(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(1);
-            },
+            }
             Instruction::Dec { what, cycles } => {
                 match what {
                     MemoryLocation::Register(reg) => {
@@ -204,10 +205,48 @@ impl CPU {
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
                 self.registers.inc_pc(1);
-            },
-                Instruction::Nop => {
+            }
+            Instruction::Rot {
+                what,
+                direction,
+                cycles,
+                length,
+            } => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let val = self.registers.get(reg);
+                        match direction {
+                            RotateDirection::Right => {
+                                if Self::check_carry_right_rotate(val) {
+                                    self.registers.f.set(C);
+                                } else {
+                                    self.registers.f.unset(C);
+                                }
+                                let result = val.rotate_right();
+                                self.registers.set(reg, result);
+                            }
+                            RotateDirection::Left => {
+                                if Self::check_carry_left_rotate(val) {
+                                    self.registers.f.set(C);
+                                } else {
+                                    self.registers.f.unset(C);
+                                }
+                                let result = val.rotate_left();
+                                self.registers.set(reg, result);
+                            }
+                        }
+                    }
+                    MemoryLocation::Pointer(_) => {
+                        panic!("NOT IMPLEMENTED")
+                    }
+                }
+                self.registers.f.unset(N);
+                self.clock += cycles as u64;
+                self.registers.inc_pc(length.count());
+            }
+            Instruction::Nop => {
                 self.registers.inc_pc(1);
-            },
+            }
             _ => {}
         }
     }
@@ -280,6 +319,20 @@ impl CPU {
             (Value::EightBit(a), Value::EightBit(b)) => a < b,
             (Value::SixteenBit(a), Value::SixteenBit(b)) => a < b,
             _ => panic!("Attempting to compare values of different sizes."),
+        }
+    }
+
+    fn check_carry_left_rotate(a: Value) -> bool {
+        match a {
+            Value::EightBit(a) => (a & 0x80) != 0,
+            Value::SixteenBit(a) => (a & 0x8000) != 0,
+        }
+    }
+
+    fn check_carry_right_rotate(a: Value) -> bool {
+        match a {
+            Value::EightBit(a) => (a & 0x01) != 0,
+            Value::SixteenBit(a) => (a & 0x0001) != 0,
         }
     }
 }

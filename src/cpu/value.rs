@@ -39,3 +39,19 @@ impl std::ops::Sub<Value> for Value {
         }
     }
 }
+
+impl Value {
+    pub(crate) fn rotate_right(self) -> Self {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.rotate_right(1)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.rotate_right(1)),
+        }
+    }
+
+    pub(crate) fn rotate_left(self) -> Self {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.rotate_left(1)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.rotate_left(1)),
+        }
+    }
+}

@@ -21,6 +21,7 @@ impl CPU {
 mod tests {
     use super::*;
     use crate::cpu::flag::Flag::{C, H, N};
+    use crate::cpu::instruction::RotateDirection;
     use crate::cpu::registers::Register::{A, HL, PC, SP};
     use crate::cpu::value::Value;
     use crate::cpu::MemoryLocation;
@@ -218,6 +219,36 @@ mod tests {
 
         assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1233));
         assert!(cpu.registers.f.is_set(N));
+    }
+
+    #[test]
+    fn test_rotate_right_instruction() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0011));
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Right,
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+        assert!(cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_left_instruction() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0011));
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Left,
+            cycles: 4,
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1000_0111));
+        assert!(cpu.registers.f.is_set(C));
     }
 
     #[test]
