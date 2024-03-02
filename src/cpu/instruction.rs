@@ -82,10 +82,8 @@ impl CPU {
                 length,
             } => {
                 match to {
-                    MemoryLocation::Register(reg) => {
-                        self.registers.set(reg, what);
-                    }
-                    MemoryLocation::Pointer(val) => self.write(val, what),
+                    MemoryLocation::Register(reg) => self.registers.set(reg, what),
+                    MemoryLocation::Pointer(addr) => self.write(addr, what),
                 };
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
@@ -246,7 +244,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_load() {
+    fn test_load_reg() {
         let mut cpu: CPU = Default::default();
         cpu.registers.set(HL, Value::SixteenBit(0x1234));
 

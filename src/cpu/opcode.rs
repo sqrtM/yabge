@@ -1,5 +1,5 @@
-use crate::cpu::instruction::{Instruction, InstructionLength};
-use crate::cpu::registers::Register::{A, B, BC, PC};
+use crate::cpu::instruction::{Instruction, InstructionLength, RotateDirection};
+use crate::cpu::registers::Register::{A, B, BC, PC, SP};
 use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
@@ -44,6 +44,23 @@ impl CPU {
                 cycles: 2,
                 length: InstructionLength::Two,
             },
+            // RLCA
+            0x07 => Instruction::Rot {
+                what: MemoryLocation::Register(A),
+                direction: RotateDirection::Left,
+                use_carry: false,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD (a16), SP
+            0x08 => Instruction::Load {
+                to: MemoryLocation::Pointer(
+                    self.read(self.registers.get(PC) + Value::SixteenBit(1), true),
+                ),
+                what: self.registers.get(SP),
+                cycles: 5,
+                length: InstructionLength::Three,
+            },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(B),
@@ -57,7 +74,7 @@ impl CPU {
 
 #[cfg(test)]
 mod test {
-    use crate::cpu::registers::Register::{A, B, BC};
+    use crate::cpu::registers::Register::{A, B, BC, SP};
     use crate::cpu::value::Value;
     use crate::cpu::CPU;
 
@@ -127,5 +144,50 @@ mod test {
         }
 
         assert_eq!(cpu.registers.get(B), Value::EightBit(0xAB));
+    }
+
+    #[test]
+    fn test_0x07() {
+        let mut cpu: CPU = Default::default();
+
+        cpu.registers.set(A, Value::EightBit(0b10010010));
+        cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x07));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b0010_0101));
+    }
+
+    #[test]
+    fn test_0x08() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(SP, Value::SixteenBit(0xABCD));
+
+        cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x08));
+        cpu.write(Value::SixteenBit(0x01), Value::EightBit(0x34));
+        cpu.write(Value::SixteenBit(0x02), Value::EightBit(0x12));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(
+            cpu.read(Value::SixteenBit(0x1234), false),
+            Value::EightBit(0xCD)
+        );
+        assert_eq!(
+            cpu.read(Value::SixteenBit(0x1235), false),
+            Value::EightBit(0xAB)
+        );
+        assert_eq!(
+            cpu.read(Value::SixteenBit(0x1234), true),
+            Value::SixteenBit(0xABCD)
+        );
     }
 }
