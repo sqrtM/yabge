@@ -1,6 +1,6 @@
+use crate::cpu::{CPU, MemoryLocation};
 use crate::cpu::flag::Flag::{C, H, N};
 use crate::cpu::value::Value;
-use crate::cpu::{MemoryLocation, CPU};
 
 pub(crate) enum RotateDirection {
     Right,
@@ -49,12 +49,7 @@ pub(crate) enum Instruction {
     Rot {
         what: MemoryLocation,
         direction: RotateDirection,
-        cycles: u8,
-        length: InstructionLength,
-    },
-    Rotc {
-        what: MemoryLocation,
-        direction: RotateDirection,
+        use_carry: bool,
         cycles: u8,
         length: InstructionLength,
     },
@@ -209,6 +204,7 @@ impl CPU {
             Instruction::Rot {
                 what,
                 direction,
+                use_carry,
                 cycles,
                 length,
             } => {
@@ -217,21 +213,11 @@ impl CPU {
                         let val = self.registers.get(reg);
                         match direction {
                             RotateDirection::Right => {
-                                if Self::check_carry_right_rotate(val) {
-                                    self.registers.f.set(C);
-                                } else {
-                                    self.registers.f.unset(C);
-                                }
-                                let result = val.rotate_right();
+                                let result = self.ror(val, use_carry);
                                 self.registers.set(reg, result);
                             }
                             RotateDirection::Left => {
-                                if Self::check_carry_left_rotate(val) {
-                                    self.registers.f.set(C);
-                                } else {
-                                    self.registers.f.unset(C);
-                                }
-                                let result = val.rotate_left();
+                                let result = self.rol(val, use_carry);
                                 self.registers.set(reg, result);
                             }
                         }
@@ -247,7 +233,6 @@ impl CPU {
             Instruction::Nop => {
                 self.registers.inc_pc(1);
             }
-            _ => {}
         }
     }
 
@@ -278,6 +263,76 @@ impl CPU {
         }
         self.registers.f.set(N);
         a - b
+    }
+
+    fn rol(&mut self, a: Value, use_carry: bool) -> Value {
+        let result = match a {
+            Value::EightBit(_) => {
+                let val = a.rotate_left();
+                if use_carry {
+                    if self.registers.f.is_set(C) {
+                         val | Value::EightBit(0x01)
+                    } else {
+                         val & Value::EightBit(0xFE)
+                    }
+                } else {
+                    val
+                }
+            }
+            Value::SixteenBit(_) => {
+                let val = a.rotate_left();
+                if use_carry {
+                    if self.registers.f.is_set(C) {
+                        val | Value::SixteenBit(0x0001)
+                    } else {
+                        val & Value::SixteenBit(0xFFFE)
+                    }
+                } else {
+                    val
+                }
+            }
+        };
+        if Self::check_carry_left_rotate(a) {
+            self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
+        }
+        result
+    }
+
+    fn ror(&mut self, a: Value, use_carry: bool) -> Value {
+        let result = match a {
+            Value::EightBit(_) => {
+                let val = a.rotate_right();
+                if use_carry {
+                    if self.registers.f.is_set(C) {
+                        val | Value::EightBit(0x80)
+                    } else {
+                        val & Value::EightBit(0x7F)
+                    }
+                } else {
+                    val
+                }
+            }
+            Value::SixteenBit(_) => {
+                let val = a.rotate_right();
+                if use_carry {
+                    if self.registers.f.is_set(C) {
+                        val | Value::SixteenBit(0x8000)
+                    } else {
+                        val & Value::SixteenBit(0x7FFF)
+                    }
+                } else {
+                    val
+                }
+            }
+        };
+        if Self::check_carry_right_rotate(a) {
+            self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
+        };
+        result
     }
 
     fn check_half_carry_add(a: Value, b: Value) -> bool {

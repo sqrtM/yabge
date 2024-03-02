@@ -222,12 +222,13 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_right_instruction() {
+    fn test_rotate_right() {
         let mut cpu: CPU = Default::default();
         cpu.registers.set(A, Value::EightBit(0b1100_0011));
         let instruction = Instruction::Rot {
             what: MemoryLocation::Register(A),
             direction: RotateDirection::Right,
+            use_carry: false,
             cycles: 4,
             length: InstructionLength::One,
         };
@@ -237,18 +238,53 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_left_instruction() {
+    fn test_rotate_left() {
         let mut cpu: CPU = Default::default();
         cpu.registers.set(A, Value::EightBit(0b1100_0011));
         let instruction = Instruction::Rot {
             what: MemoryLocation::Register(A),
             direction: RotateDirection::Left,
+            use_carry: false,
             cycles: 4,
             length: InstructionLength::Two,
         };
         cpu.execute(instruction);
         assert_eq!(cpu.registers.get(A), Value::EightBit(0b1000_0111));
         assert!(cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_right_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b1100_0010));
+        cpu.registers.f.set(C);
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Right,
+            use_carry: true,
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+        assert!(!cpu.registers.f.is_set(C));
+    }
+
+    #[test]
+    fn test_rotate_left_carry() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b0100_1000));
+        cpu.registers.f.set(C);
+        let instruction = Instruction::Rot {
+            what: MemoryLocation::Register(A),
+            direction: RotateDirection::Left,
+            use_carry: true,
+            cycles: 4,
+            length: InstructionLength::Two,
+        };
+        cpu.execute(instruction);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1001_0001));
+        assert!(!cpu.registers.f.is_set(C));
     }
 
     #[test]
