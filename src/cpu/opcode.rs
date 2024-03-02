@@ -1,7 +1,7 @@
 use crate::cpu::instruction::{Instruction, InstructionLength};
 use crate::cpu::registers::Register;
-use crate::cpu::{CPU, MemoryLocation};
 use crate::cpu::registers::Register::A;
+use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
     pub fn lookup(&self, code: u8) -> Instruction {
@@ -21,29 +21,27 @@ impl CPU {
 mod tests {
     use super::*;
     use crate::cpu::flag::Flag::{C, H};
-    use crate::cpu::registers::Register::{A, HL};
+    use crate::cpu::registers::Register::{A, HL, SP};
     use crate::cpu::value::Value;
-    use crate::cpu::{MemoryLocation, registers};
+    use crate::cpu::{registers, MemoryLocation};
 
     #[test]
     fn test_load() {
         let mut cpu = CPU {
             registers: Default::default(),
-            stack_pointer: Value::SixteenBit(0x5678),
-            program_counter: 0, 
-            clock: 0, 
+            clock: 0,
         };
         cpu.registers.set(HL, Value::SixteenBit(0x1234));
 
         let instruction = Instruction::Load {
-            to: MemoryLocation::StackPointer,
+            to: MemoryLocation::Register(SP),
             what: cpu.registers.get(HL),
             cycles: 1,
             length: InstructionLength::One,
         };
         cpu.execute(instruction);
 
-        assert_eq!(cpu.stack_pointer, Value::SixteenBit(0x1234));
+        assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x1234));
         assert!(!cpu.registers.f.is_set(C));
         assert!(!cpu.registers.f.is_set(H));
     }

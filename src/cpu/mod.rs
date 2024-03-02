@@ -7,10 +7,9 @@ mod opcode;
 pub mod registers;
 mod value;
 
+#[derive(Default, Debug)]
 pub struct CPU {
     registers: Registers,
-    stack_pointer: Value,
-    program_counter: u16,
     clock: u64,
 }
 
@@ -18,18 +17,6 @@ pub struct CPU {
 pub enum MemoryLocation {
     Register(Register),
     Pointer(Value),
-    StackPointer
-}
-
-impl Default for CPU {
-    fn default() -> Self {
-        CPU {
-            registers: Default::default(),
-            stack_pointer: Value::SixteenBit(0),
-            program_counter: 0x100,
-            clock: 0,
-        }
-    }
 }
 
 #[cfg(test)]

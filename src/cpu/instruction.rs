@@ -1,6 +1,6 @@
-use crate::cpu::{CPU, MemoryLocation};
 use crate::cpu::flag::Flag::{C, H, N};
 use crate::cpu::value::Value;
+use crate::cpu::{MemoryLocation, CPU};
 
 pub(crate) enum Instruction {
     Load {
@@ -66,13 +66,10 @@ impl CPU {
                     MemoryLocation::Register(reg) => {
                         self.registers.set(reg, what);
                     }
-                    MemoryLocation::StackPointer => {
-                        self.stack_pointer = what;
-                    },
-                    _ => panic!("NOT IMPLEMENTED!!!!")
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.clock += cycles as u64;
-                self.program_counter += length.count();
+                self.registers.inc_pc(length.count());
             }
             Instruction::Add {
                 to,
@@ -85,11 +82,11 @@ impl CPU {
                         let result = self.add(self.registers.get(reg), what);
                         self.registers.set(reg, result);
                     }
-                    _ => panic!("NOT IMPLEMENTED!!!!")
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.registers.f.unset(N);
                 self.clock += cycles as u64;
-                self.program_counter += length.count();
+                self.registers.inc_pc(length.count());
             }
             Instruction::Adc {
                 to,
@@ -108,11 +105,11 @@ impl CPU {
                         let result = self.add(self.registers.get(reg), operand_with_carry);
                         self.registers.set(reg, result);
                     }
-                    _ => panic!("NOT IMPLEMENTED!!!!")
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.registers.f.unset(N);
                 self.clock += cycles as u64;
-                self.program_counter += length.count();
+                self.registers.inc_pc(length.count());
             }
             Instruction::Sub {
                 from,
@@ -125,10 +122,10 @@ impl CPU {
                         let result = self.sub(self.registers.get(reg), what);
                         self.registers.set(reg, result);
                     }
-                    _ => panic!("NOT IMPLEMENTED!!!!")
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.clock += cycles as u64;
-                self.program_counter += length.count();
+                self.registers.inc_pc(length.count());
             }
             Instruction::Sbc {
                 from,
@@ -147,11 +144,11 @@ impl CPU {
                         let result = self.sub(self.registers.get(reg), operand_with_carry);
                         self.registers.set(reg, result);
                     }
-                    _ => panic!("NOT IMPLEMENTED!!!!")
+                    _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.registers.f.set(N);
                 self.clock += cycles as u64;
-                self.program_counter += length.count();
+                self.registers.inc_pc(length.count());
             }
             _ => {}
         }

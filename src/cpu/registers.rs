@@ -14,9 +14,11 @@ pub enum Register {
     BC,
     DE,
     HL,
+    SP,
+    PC,
 }
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct Registers {
     a: u8,
     b: u8,
@@ -26,6 +28,8 @@ pub struct Registers {
     pub f: FlagRegister,
     h: u8,
     l: u8,
+    sp: u16,
+    pc: u16,
 }
 
 impl Registers {
@@ -64,6 +68,8 @@ impl Registers {
                     self.h = hi;
                     self.l = lo;
                 }
+                Register::SP => self.sp = v,
+                Register::PC => self.pc = v,
                 _ => {
                     panic!("Attempting to load an 16 bit value to a 8 bit register")
                 }
@@ -84,11 +90,17 @@ impl Registers {
             Register::BC => Value::SixteenBit(self.bc()),
             Register::DE => Value::SixteenBit(self.de()),
             Register::HL => Value::SixteenBit(self.hl()),
+            Register::SP => Value::SixteenBit(self.sp),
+            Register::PC => Value::SixteenBit(self.pc),
         }
     }
 
     pub(crate) fn flags(&self) -> &FlagRegister {
         &self.f
+    }
+
+    pub(crate) fn inc_pc(&mut self, value: u16) {
+        self.pc += value;
     }
 
     pub(crate) fn af(&self) -> u16 {

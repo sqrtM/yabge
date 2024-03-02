@@ -12,7 +12,7 @@ pub enum Flag {
     C,
 }
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct FlagRegister(u8);
 
 impl FlagRegister {
