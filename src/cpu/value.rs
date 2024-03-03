@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Value {
@@ -45,7 +45,7 @@ impl Add<u16> for Value {
 
     fn add(self, rhs: u16) -> Value {
         match self {
-            Value::EightBit(a) => Value::SixteenBit((a as u16).wrapping_add(rhs)),
+            Value::EightBit(a) => Value::EightBit(a.wrapping_add(rhs as u8)),
             Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs)),
         }
     }
@@ -56,7 +56,7 @@ impl Add<i16> for Value {
 
     fn add(self, rhs: i16) -> Value {
         match self {
-            Value::EightBit(a) => Value::SixteenBit((a as u16).wrapping_add(rhs as u16)),
+            Value::EightBit(a) => Value::EightBit(a.wrapping_add(rhs as u8)),
             Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_add(rhs as u16)),
         }
     }
@@ -86,7 +86,7 @@ impl std::ops::BitOr<Value> for Value {
     }
 }
 
-impl std::ops::Sub<Value> for Value {
+impl Sub<Value> for Value {
     type Output = Value;
 
     fn sub(self, rhs: Value) -> Value {
@@ -94,6 +94,50 @@ impl std::ops::Sub<Value> for Value {
             (Value::EightBit(a), Value::EightBit(b)) => Value::EightBit(a.wrapping_sub(b)),
             (Value::SixteenBit(a), Value::SixteenBit(b)) => Value::SixteenBit(a.wrapping_sub(b)),
             _ => panic!("Attempted to subtract values of different sizes"),
+        }
+    }
+}
+
+impl Sub<u8> for Value {
+    type Output = Value;
+
+    fn sub(self, rhs: u8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_sub(rhs)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_sub(rhs as u16)),
+        }
+    }
+}
+
+impl Sub<i8> for Value {
+    type Output = Value;
+
+    fn sub(self, rhs: i8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_sub(rhs as u8)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_sub(rhs as u16)),
+        }
+    }
+}
+
+impl Sub<u16> for Value {
+    type Output = Value;
+
+    fn sub(self, rhs: u16) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_sub(rhs as u8)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_sub(rhs)),
+        }
+    }
+}
+
+impl Sub<i16> for Value {
+    type Output = Value;
+
+    fn sub(self, rhs: i16) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a.wrapping_sub(rhs as u8)),
+            Value::SixteenBit(a) => Value::SixteenBit(a.wrapping_sub(rhs as u16)),
         }
     }
 }

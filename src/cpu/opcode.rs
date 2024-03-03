@@ -1,8 +1,10 @@
 use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::{
-    Instruction, InstructionLength, JumpCondition, JumpCycles, RotateDirection,
+    AdditionalInstruction, Instruction, InstructionLength, JumpCondition, JumpCycles,
+    RotateDirection,
 };
-use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, HL, SP};
+use crate::cpu::registers::Register;
+use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, SP};
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
@@ -14,6 +16,7 @@ impl CPU {
             0x01 => Instruction::Load {
                 to: MemoryLocation::Register(BC),
                 what: self.immediate_operand(true),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 3,
                 length: InstructionLength::Three,
             },
@@ -21,6 +24,7 @@ impl CPU {
             0x02 => Instruction::Load {
                 to: MemoryLocation::Pointer(self.registers.get(BC)),
                 what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::One,
             },
@@ -43,6 +47,7 @@ impl CPU {
             0x06 => Instruction::Load {
                 to: MemoryLocation::Register(B),
                 what: self.immediate_operand(false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::Two,
             },
@@ -58,6 +63,7 @@ impl CPU {
             0x08 => Instruction::Load {
                 to: MemoryLocation::Pointer(self.immediate_operand(true)),
                 what: self.registers.get(SP),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 5,
                 length: InstructionLength::Three,
             },
@@ -72,6 +78,7 @@ impl CPU {
             0x0A => Instruction::Load {
                 to: MemoryLocation::Register(A),
                 what: self.read(self.registers.get(BC), false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::One,
             },
@@ -94,6 +101,7 @@ impl CPU {
             0x0E => Instruction::Load {
                 to: MemoryLocation::Register(C),
                 what: self.immediate_operand(false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::Two,
             },
@@ -111,6 +119,7 @@ impl CPU {
             0x11 => Instruction::Load {
                 to: MemoryLocation::Register(DE),
                 what: self.immediate_operand(true),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 3,
                 length: InstructionLength::Three,
             },
@@ -118,6 +127,7 @@ impl CPU {
             0x12 => Instruction::Load {
                 to: MemoryLocation::Pointer(self.registers.get(DE)),
                 what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::One,
             },
@@ -140,6 +150,7 @@ impl CPU {
             0x16 => Instruction::Load {
                 to: MemoryLocation::Register(D),
                 what: self.immediate_operand(false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::Two,
             },
@@ -172,6 +183,7 @@ impl CPU {
             0x1A => Instruction::Load {
                 to: MemoryLocation::Register(A),
                 what: self.read(self.registers.get(DE), false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::One,
             },
@@ -194,6 +206,7 @@ impl CPU {
             0x1E => Instruction::Load {
                 to: MemoryLocation::Register(E),
                 what: self.immediate_operand(false),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 2,
                 length: InstructionLength::Two,
             },
@@ -219,8 +232,40 @@ impl CPU {
             0x21 => Instruction::Load {
                 to: MemoryLocation::Register(HL),
                 what: self.immediate_operand(true),
+                additional_instruction: AdditionalInstruction::None,
                 cycles: 3,
                 length: InstructionLength::Three,
+            },
+            // LD (HL+), 1
+            0x22 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::Inc,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // INC HL
+            0x23 => Instruction::Inc {
+                what: MemoryLocation::Register(HL),
+                cycles: 2,
+            },
+            // INC H
+            0x24 => Instruction::Inc {
+                what: MemoryLocation::Register(H),
+                cycles: 1,
+            },
+            // DEC H
+            0x25 => Instruction::Dec {
+                what: MemoryLocation::Register(H),
+                cycles: 1,
+            },
+            // LD H, d8
+            0x26 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.immediate_operand(false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::Two,
             },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
@@ -553,6 +598,7 @@ mod test {
         assert_eq!(cpu2.registers.get(PC), Value::SixteenBit(0x02));
     }
 
+    #[test]
     fn test_0x21() {
         let mut cpu: CPU = Default::default();
         cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x21));
@@ -565,5 +611,24 @@ mod test {
         }
 
         assert_eq!(cpu.registers.get(HL), Value::SixteenBit(0xABCD));
+    }
+
+    #[test]
+    fn test_0x22() {
+        let mut cpu: CPU = Default::default();
+        cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x22));
+        cpu.registers.set(A, Value::EightBit(0xAB));
+        cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(
+            cpu.read(Value::SixteenBit(0xCAFE), false),
+            Value::EightBit(0xAB)
+        );
     }
 }

@@ -21,10 +21,17 @@ pub(crate) struct JumpCycles {
     pub(crate) not_executed: u8,
 }
 
+pub(crate) enum AdditionalInstruction {
+    Inc,
+    Dec,
+    None,
+}
+
 pub(crate) enum Instruction {
     Load {
         to: MemoryLocation,
         what: Value,
+        additional_instruction: AdditionalInstruction,
         cycles: u8,
         length: InstructionLength,
     },
@@ -104,6 +111,7 @@ impl CPU {
             Instruction::Load {
                 to,
                 what,
+                additional_instruction,
                 cycles,
                 length,
             } => {
@@ -111,6 +119,19 @@ impl CPU {
                     MemoryLocation::Register(reg) => self.registers.set(reg, what),
                     MemoryLocation::Pointer(addr) => self.write(addr, what),
                 };
+                match additional_instruction {
+                    AdditionalInstruction::Inc => {
+                        if let MemoryLocation::Register(reg) = to {
+                            self.registers.set(reg, self.registers.get(reg) + 1u8)
+                        };
+                    }
+                    AdditionalInstruction::Dec => {
+                        if let MemoryLocation::Register(reg) = to {
+                            self.registers.set(reg, self.registers.get(reg) - 1u8)
+                        };
+                    }
+                    AdditionalInstruction::None => {}
+                }
                 self.clock += cycles as u64;
                 self.registers.inc_pc(length.count());
             }
@@ -306,6 +327,7 @@ mod tests {
         let instruction = Instruction::Load {
             to: MemoryLocation::Register(SP),
             what: cpu.registers.get(HL),
+            additional_instruction: AdditionalInstruction::None,
             cycles: 1,
             length: InstructionLength::One,
         };
