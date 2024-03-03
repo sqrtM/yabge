@@ -3,7 +3,6 @@ use crate::cpu::instruction::{
     AdditionalInstruction, Instruction, InstructionLength, JumpCondition, JumpCycles,
     RotateDirection,
 };
-use crate::cpu::registers::Register;
 use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, SP};
 use crate::cpu::{MemoryLocation, CPU};
 

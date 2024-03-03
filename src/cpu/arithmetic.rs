@@ -118,7 +118,7 @@ impl CPU {
         result
     }
 
-    fn check_zero_flag(&mut self, a: Value) {
+    pub fn check_zero_flag(&mut self, a: Value) {
         if a == Value::EightBit(0) || a == Value::SixteenBit(0) {
             self.registers.f.set(Z)
         } else {
@@ -128,8 +128,10 @@ impl CPU {
 
     fn check_half_carry_add(a: Value, b: Value) -> bool {
         match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (u16::from(a) + u16::from(b)) > 0xF,
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => (u32::from(a) + u32::from(b)) > 0xFF,
+            (Value::EightBit(a), Value::EightBit(b)) => (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10,
+            (Value::SixteenBit(a), Value::SixteenBit(b)) => {
+                (((a & 0x00FF) + (b & 0x00FF)) & 0x0100) == 0x0100
+            }
             _ => panic!("Attempting to compare values of different sizes."),
         }
     }
@@ -198,6 +200,28 @@ pub(crate) fn unsigned_to_signed(value: Value) -> i16 {
 mod tests {
     use crate::cpu::arithmetic::unsigned_to_signed;
     use crate::cpu::value::Value;
+    use crate::cpu::CPU;
+
+    #[test]
+    fn test_check_half_carry_add() {
+        let a = Value::EightBit(0x80);
+        let b = Value::EightBit(0x90);
+        let h = CPU::check_half_carry_add(a, b);
+        assert!(!h);
+    }
+
+    #[test]
+    fn test_check_carry_add() {
+        let a = Value::EightBit(0x19);
+        let b = Value::EightBit(0x28);
+        let c = CPU::check_carry_add(a, b);
+        assert!(!c);
+
+        let a = Value::EightBit(0x80);
+        let b = Value::EightBit(0x90);
+        let c = CPU::check_carry_add(a, b);
+        assert!(c);
+    }
 
     #[test]
     fn test_unsigned_to_signed() {
