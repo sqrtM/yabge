@@ -86,6 +86,11 @@ pub enum Instruction {
         cycles: JumpCycles,
         length: InstructionLength,
     },
+    And {
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
     Daa,
     Cpl,
     Scf,
@@ -299,6 +304,19 @@ impl CPU {
                     self.registers.inc_pc(length.count());
                     self.clock += cycles.not_executed as u64;
                 }
+            }
+            Instruction::And {
+                what,
+                cycles,
+                length,
+            } => {
+                let result = self.registers.get(A) & what;
+                self.registers.set(A, result);
+                // Apparently H is always set when running AND
+                self.registers.f.set(H);
+                self.check_zero_flag(result);
+                self.registers.inc_pc(length.count());
+                self.clock += cycles as u64;
             }
             Instruction::Daa => {
                 let mut result = self.registers.get(A);

@@ -1,4 +1,4 @@
-use std::ops::{Add, Not, Sub};
+use std::ops::{Add, BitXor, Not, Sub};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub enum Value {
@@ -82,6 +82,18 @@ impl std::ops::BitOr<Value> for Value {
             (Value::EightBit(a), Value::EightBit(b)) => Value::EightBit(a | b),
             (Value::SixteenBit(a), Value::SixteenBit(b)) => Value::SixteenBit(a | b),
             _ => panic!("Attempted to perform bitwise OR on values of different sizes"),
+        }
+    }
+}
+
+impl BitXor<Value> for Value {
+    type Output = Value;
+
+    fn bitxor(self, rhs: Value) -> Value {
+        match (self, rhs) {
+            (Value::EightBit(a), Value::EightBit(b)) => Value::EightBit(a ^ b),
+            (Value::SixteenBit(a), Value::SixteenBit(b)) => Value::SixteenBit(a ^ b),
+            _ => panic!("Attempted to perform bitwise XOR on values of different sizes"),
         }
     }
 }

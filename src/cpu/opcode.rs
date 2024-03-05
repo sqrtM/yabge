@@ -926,10 +926,228 @@ impl CPU {
                 cycles: 1,
                 length: InstructionLength::One,
             },
+            // ADD A, B
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(B),
-                cycles: 4,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, C
+            0x81 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, D
+            0x82 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, E
+            0x83 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, H
+            0x84 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, L
+            0x85 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADD A, (HL)
+            0x86 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // ADD A, A
+            0x87 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, B
+            0x88 => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, C
+            0x89 => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, D
+            0x8A => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, E
+            0x8B => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, H
+            0x8C => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, L
+            0x8D => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // ADC A, (HL)
+            0x8E => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // ADC A, A
+            0x8F => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(A),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, B
+            0x90 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, C
+            0x91 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, D
+            0x92 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, E
+            0x93 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, H
+            0x94 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, L
+            0x95 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SUB A, (HL)
+            0x96 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // SUB A, A
+            0x97 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, B
+            0x98 => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, C
+            0x99 => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, D
+            0x9A => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, E
+            0x9B => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, H
+            0x9C => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, L
+            0x9D => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // SBC A, (HL)
+            0x9E => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // SBC A, A
+            0x9F => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.registers.get(A),
+                cycles: 1,
                 length: InstructionLength::One,
             },
             _ => Instruction::Nop,

@@ -4,7 +4,7 @@ use yabge::cpu::instruction::{
     RotateDirection,
 };
 use yabge::cpu::registers::Register;
-use yabge::cpu::registers::Register::{A, HL, PC, SP};
+use yabge::cpu::registers::Register::{A, B, HL, PC, SP};
 use yabge::cpu::value::Value;
 use yabge::cpu::{MemoryLocation, CPU};
 
@@ -524,4 +524,31 @@ fn test_rotate_right() {
     cpu.execute(instruction);
     assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
     assert!(cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_and() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    cpu.registers.set(B, Value::EightBit(0b0100_1110));
+    let instruction = Instruction::And {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b0100_0010));
+
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    cpu.registers.set(B, Value::EightBit(0b0011_1100));
+    let instruction = Instruction::And {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0));
+    assert!(cpu.registers.f.is_set(Z))
 }
