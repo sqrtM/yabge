@@ -128,9 +128,11 @@ impl CPU {
 
     fn check_half_carry_add(a: Value, b: Value) -> bool {
         match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10,
+            (Value::EightBit(a), Value::EightBit(b)) => {
+                (((a & 0x0F).wrapping_add(b & 0x0F)) & 0x10) == 0x10
+            }
             (Value::SixteenBit(a), Value::SixteenBit(b)) => {
-                (((a & 0x00FF) + (b & 0x00FF)) & 0x0100) == 0x0100
+                (((a & 0x00FF).wrapping_add(b & 0x00FF)) & 0x0100) == 0x0100
             }
             _ => panic!("Attempting to compare values of different sizes."),
         }
@@ -146,8 +148,12 @@ impl CPU {
 
     fn check_half_carry_sub(a: Value, b: Value) -> bool {
         match (a, b) {
-            (Value::EightBit(a), Value::EightBit(b)) => (a & 0xF) < (b & 0xF),
-            (Value::SixteenBit(a), Value::SixteenBit(b)) => (a & 0xFFF) < (b & 0xFFF),
+            (Value::EightBit(a), Value::EightBit(b)) => {
+                ((a & 0x0F).wrapping_sub(b & 0x0F)) & 0x10 == 0x10
+            }
+            (Value::SixteenBit(a), Value::SixteenBit(b)) => {
+                ((a & 0x00FF).wrapping_sub(b & 0x00FF)) & 0x0100 == 0x0100
+            }
             _ => panic!("Attempting to compare values of different sizes."),
         }
     }
@@ -208,6 +214,17 @@ mod tests {
         let b = Value::EightBit(0x90);
         let h = CPU::check_half_carry_add(a, b);
         assert!(!h);
+    }
+
+    #[test]
+    fn test_check_half_carry_sub() {
+        let a = Value::EightBit(0x47);
+        let b = Value::EightBit(0x28);
+        assert!(CPU::check_half_carry_sub(a, b));
+
+        let c = Value::EightBit(0x60);
+        let d = Value::EightBit(0x30);
+        assert!(!CPU::check_half_carry_sub(c, d));
     }
 
     #[test]

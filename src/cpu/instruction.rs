@@ -778,7 +778,7 @@ mod tests {
     fn test_daa_after_sub_1() {
         let mut cpu: CPU = Default::default();
 
-        // ADD
+        // SUB
         cpu.registers.set(A, Value::EightBit(0x47));
         cpu.registers.set(Register::B, Value::EightBit(0x28));
 
@@ -797,6 +797,56 @@ mod tests {
         // DAA Correction
         cpu.execute(Instruction::Daa);
         assert_eq!(cpu.registers.get(A), Value::EightBit(0x19));
+    }
+
+    #[test]
+    fn test_daa_after_sub_2() {
+        let mut cpu: CPU = Default::default();
+
+        // SUB
+        cpu.registers.set(A, Value::EightBit(0x20));
+        cpu.registers.set(Register::B, Value::EightBit(0x13));
+
+        let instruction = Instruction::Sub {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x0D));
+        assert!(cpu.registers.f.is_set(H));
+        assert!(!cpu.registers.f.is_set(C));
+
+        // DAA Correction
+        cpu.execute(Instruction::Daa);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x07));
+    }
+
+    #[test]
+    fn test_daa_after_sub_3() {
+        let mut cpu: CPU = Default::default();
+
+        // SUB
+        cpu.registers.set(A, Value::EightBit(0x05));
+        cpu.registers.set(Register::B, Value::EightBit(0x21));
+
+        let instruction = Instruction::Sub {
+            from: MemoryLocation::Register(A),
+            what: cpu.registers.get(Register::B),
+            cycles: 4,
+            length: InstructionLength::One,
+        };
+        cpu.execute(instruction);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0xE4));
+        assert!(!cpu.registers.f.is_set(H));
+        assert!(cpu.registers.f.is_set(C));
+
+        // DAA Correction
+        cpu.execute(Instruction::Daa);
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0x84));
     }
 
     #[test]
