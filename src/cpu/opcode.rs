@@ -266,6 +266,33 @@ impl CPU {
                 cycles: 2,
                 length: InstructionLength::Two,
             },
+            // DAA
+            0x27 => Instruction::Daa,
+            // JR Z, s8
+            0x28 => Instruction::Jr {
+                how_far: self.immediate_operand(false),
+                condition: JumpCondition::FlagOn(Z),
+                cycles: JumpCycles {
+                    executed: 3,
+                    not_executed: 2,
+                },
+                length: InstructionLength::Two,
+            },
+            // ADD HL, HL
+            0x29 => Instruction::Add {
+                to: MemoryLocation::Register(HL),
+                what: self.registers.get(HL),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD A, (HL+)
+            0x30 => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::Inc,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(B),
@@ -629,5 +656,36 @@ mod test {
             cpu.read(Value::SixteenBit(0xCAFE), false),
             Value::EightBit(0xAB)
         );
+    }
+
+    #[test]
+    fn test_0x29() {
+        let mut cpu: CPU = Default::default();
+        cpu.write(Value::SixteenBit(0x00), Value::SixteenBit(0x29));
+        cpu.registers.set(HL, Value::SixteenBit(0xAB));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(cpu.registers.get(HL), Value::SixteenBit(0x0156));
+    }
+
+    #[test]
+    fn test_0x30() {
+        let mut cpu: CPU = Default::default();
+        cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0x30));
+        cpu.write(Value::SixteenBit(0xABCD), Value::EightBit(0xFE));
+        cpu.registers.set(HL, Value::SixteenBit(0xABCD));
+
+        let val = cpu.read(Value::SixteenBit(0x00), false);
+        if let Value::EightBit(code) = val {
+            let inst = cpu.lookup(code);
+            cpu.execute(inst);
+        }
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0xFE));
     }
 }

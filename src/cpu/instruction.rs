@@ -1,7 +1,7 @@
 use crate::cpu::arithmetic::unsigned_to_signed;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::{C, H, N};
-use crate::cpu::registers::Register::{A, PC};
+use crate::cpu::registers::Register::{A, HL, PC};
 use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
@@ -122,14 +122,10 @@ impl CPU {
                 };
                 match additional_instruction {
                     AdditionalInstruction::Inc => {
-                        if let MemoryLocation::Register(reg) = to {
-                            self.registers.set(reg, self.registers.get(reg) + 1u8)
-                        };
+                        self.registers.set(HL, self.registers.get(HL) + 1u8)
                     }
                     AdditionalInstruction::Dec => {
-                        if let MemoryLocation::Register(reg) = to {
-                            self.registers.set(reg, self.registers.get(reg) - 1u8)
-                        };
+                        self.registers.set(HL, self.registers.get(HL) - 1u8)
                     }
                     AdditionalInstruction::None => {}
                 }
