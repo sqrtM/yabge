@@ -420,6 +420,512 @@ impl CPU {
             },
             // CCF
             0x3F => Instruction::Ccf,
+            // LD B, B
+            0x40 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, C
+            0x41 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, D
+            0x42 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, E
+            0x43 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, H
+            0x44 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, L
+            0x45 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, (HL)
+            0x46 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD B, A
+            0x47 => Instruction::Load {
+                to: MemoryLocation::Register(B),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, B
+            0x48 => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, C
+            0x49 => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, D
+            0x4A => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, E
+            0x4B => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, H
+            0x4C => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD C, L
+            0x4D => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD B, (HL)
+            0x4E => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD C, A
+            0x4F => Instruction::Load {
+                to: MemoryLocation::Register(C),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, B
+            0x50 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, C
+            0x51 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, D
+            0x52 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, E
+            0x53 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, H
+            0x54 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, L
+            0x55 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD D, (HL)
+            0x56 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD D, A
+            0x57 => Instruction::Load {
+                to: MemoryLocation::Register(D),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, B
+            0x58 => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, C
+            0x59 => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, D
+            0x5A => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, E
+            0x5B => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, H
+            0x5C => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, L
+            0x5D => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD E, (HL)
+            0x5E => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD E, A
+            0x5F => Instruction::Load {
+                to: MemoryLocation::Register(E),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, B
+            0x60 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, C
+            0x61 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, D
+            0x62 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, E
+            0x63 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, H
+            0x64 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, L
+            0x65 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD H, (HL)
+            0x66 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD H, A
+            0x67 => Instruction::Load {
+                to: MemoryLocation::Register(H),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, B
+            0x68 => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, C
+            0x69 => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, D
+            0x6A => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, E
+            0x6B => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, H
+            0x6C => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, L
+            0x6D => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD L, (HL)
+            0x6E => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD L, A
+            0x6F => Instruction::Load {
+                to: MemoryLocation::Register(L),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD (HL), B
+            0x70 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD (HL), C
+            0x71 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD (HL), D
+            0x72 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD (HL), E
+            0x73 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD (HL), H
+            0x74 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD (HL), L
+            0x75 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // Halt
+            0x76 => todo!("Halt not yet implemented!!"),
+            // LD (HL), A
+            0x77 => Instruction::Load {
+                to: MemoryLocation::Pointer(self.registers.get(HL)),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD A, B
+            0x78 => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(B),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, C
+            0x79 => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(C),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, D
+            0x7A => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(D),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, E
+            0x7B => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(E),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, H
+            0x7C => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(H),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, L
+            0x7D => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(L),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // LD A, (HL)
+            0x7E => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.registers.get(HL), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD A, A
+            0x7F => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 1,
+                length: InstructionLength::One,
+            },
             0x80 => Instruction::Add {
                 to: MemoryLocation::Register(A),
                 what: self.registers.get(B),
