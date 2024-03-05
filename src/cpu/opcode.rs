@@ -1150,6 +1150,198 @@ impl CPU {
                 cycles: 1,
                 length: InstructionLength::One,
             },
+            // AND B
+            0xA0 => Instruction::And {
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND C
+            0xA1 => Instruction::And {
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND D
+            0xA2 => Instruction::And {
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND E
+            0xA3 => Instruction::And {
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND H
+            0xA4 => Instruction::And {
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND L
+            0xA5 => Instruction::And {
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // AND (HL)
+            0xA6 => Instruction::And {
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // AND A
+            0xA7 => Instruction::And {
+                what: self.registers.get(A),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR B
+            0xA8 => Instruction::Xor {
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR C
+            0xA9 => Instruction::Xor {
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR D
+            0xAA => Instruction::Xor {
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR E
+            0xAB => Instruction::Xor {
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR H
+            0xAC => Instruction::Xor {
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR L
+            0xAD => Instruction::Xor {
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // XOR (HL)
+            0xAE => Instruction::Xor {
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // XOR A
+            0xAF => Instruction::Xor {
+                what: self.registers.get(A),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR B
+            0xB0 => Instruction::Or {
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR C
+            0xB1 => Instruction::Or {
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR D
+            0xB2 => Instruction::Or {
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR E
+            0xB3 => Instruction::Or {
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR H
+            0xB4 => Instruction::Or {
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR L
+            0xB5 => Instruction::Or {
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // OR (HL)
+            0xB6 => Instruction::Or {
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // OR A
+            0xB7 => Instruction::Or {
+                what: self.registers.get(A),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP B
+            0xB8 => Instruction::Cp {
+                what: self.registers.get(B),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP C
+            0xB9 => Instruction::Cp {
+                what: self.registers.get(C),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP D
+            0xBA => Instruction::Cp {
+                what: self.registers.get(D),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP E
+            0xBB => Instruction::Cp {
+                what: self.registers.get(E),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP H
+            0xBC => Instruction::Cp {
+                what: self.registers.get(H),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP L
+            0xBD => Instruction::Cp {
+                what: self.registers.get(L),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
+            // CP (HL)
+            0xBE => Instruction::Cp {
+                what: self.read(self.registers.get(HL), false),
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // CP A
+            0xBF => Instruction::Cp {
+                what: self.registers.get(A),
+                cycles: 1,
+                length: InstructionLength::One,
+            },
             _ => Instruction::Nop,
         }
     }
