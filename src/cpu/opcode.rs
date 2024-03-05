@@ -581,7 +581,7 @@ mod test {
     }
 
     #[test]
-    fn test_0x1F() {
+    fn test_0x1f() {
         let mut cpu: CPU = Default::default();
         cpu.registers.set(A, Value::EightBit(0b0010_1000));
         cpu.registers.f.set(Flag::C);

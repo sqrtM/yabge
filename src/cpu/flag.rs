@@ -41,7 +41,7 @@ impl FlagRegister {
     }
 
     pub fn get(&self) -> u8 {
-        self.0 >> 4
+        self.0
     }
 
     pub fn overwrite(&mut self, value: u8) {

@@ -87,7 +87,7 @@ mod tests {
         cpu.f.set(Flag::H);
         cpu.f.set(Flag::C);
         cpu.set(Register::A, Value::EightBit(0xAB));
-        assert_eq!(cpu.af(), 0xAB03);
+        assert_eq!(cpu.af(), 0xAB30);
     }
 
     #[test]
