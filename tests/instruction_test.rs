@@ -552,3 +552,83 @@ fn test_and() {
     assert_eq!(cpu.registers.get(A), Value::EightBit(0));
     assert!(cpu.registers.f.is_set(Z))
 }
+
+#[test]
+fn test_xor() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    cpu.registers.set(B, Value::EightBit(0b0100_1110));
+    let instruction = Instruction::Xor {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1000_1101));
+
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1111_0111));
+    cpu.registers.set(B, Value::EightBit(0b1011_1100));
+    let instruction = Instruction::Xor {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b0100_1011));
+}
+
+#[test]
+fn test_or() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    cpu.registers.set(B, Value::EightBit(0b0100_1110));
+    let instruction = Instruction::Or {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1100_1111));
+
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1111_0111));
+    cpu.registers.set(B, Value::EightBit(0b1011_1100));
+    let instruction = Instruction::Or {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1111_1111));
+}
+
+#[test]
+fn test_cp() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x20));
+    cpu.registers.set(B, Value::EightBit(0x40));
+    let instruction = Instruction::Cp {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x20));
+    assert!(cpu.registers.f.is_set(C));
+
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x30));
+    cpu.registers.set(B, Value::EightBit(0x30));
+    let instruction = Instruction::Cp {
+        what: cpu.registers.get(B),
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x30));
+    assert!(cpu.registers.f.is_set(Z))
+}

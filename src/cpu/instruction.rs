@@ -91,6 +91,21 @@ pub enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Xor {
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
+    Or {
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
+    Cp {
+        what: Value,
+        cycles: u8,
+        length: InstructionLength,
+    },
     Daa,
     Cpl,
     Scf,
@@ -314,6 +329,46 @@ impl CPU {
                 self.registers.set(A, result);
                 // Apparently H is always set when running AND
                 self.registers.f.set(H);
+                self.registers.f.unset(N);
+                self.registers.f.unset(C);
+                self.check_zero_flag(result);
+                self.registers.inc_pc(length.count());
+                self.clock += cycles as u64;
+            }
+            Instruction::Xor {
+                what,
+                cycles,
+                length,
+            } => {
+                let result = self.registers.get(A) ^ what;
+                self.registers.set(A, result);
+                self.registers.f.unset(N);
+                self.registers.f.unset(C);
+                self.registers.f.unset(H);
+                self.check_zero_flag(result);
+                self.registers.inc_pc(length.count());
+                self.clock += cycles as u64;
+            }
+            Instruction::Or {
+                what,
+                cycles,
+                length,
+            } => {
+                let result = self.registers.get(A) | what;
+                self.registers.set(A, result);
+                self.check_zero_flag(result);
+                self.registers.f.unset(N);
+                self.registers.f.unset(C);
+                self.registers.f.unset(H);
+                self.registers.inc_pc(length.count());
+                self.clock += cycles as u64;
+            }
+            Instruction::Cp {
+                what,
+                cycles,
+                length,
+            } => {
+                let result = self.sub(self.registers.get(A), what);
                 self.check_zero_flag(result);
                 self.registers.inc_pc(length.count());
                 self.clock += cycles as u64;
