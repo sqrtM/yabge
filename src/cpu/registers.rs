@@ -20,7 +20,7 @@ pub enum Register {
 }
 
 impl Register {
-    pub(crate) fn is_eight_bits(&self) -> bool {
+    pub fn is_eight_bits(&self) -> bool {
         match self {
             Register::A => true,
             Register::B => true,
@@ -54,7 +54,7 @@ pub struct Registers {
 }
 
 impl Registers {
-    pub(crate) fn set(&mut self, register: Register, value: Value) {
+    pub fn set(&mut self, register: Register, value: Value) {
         match value {
             Value::EightBit(v) => match register {
                 Register::A => self.a = v,
@@ -98,7 +98,7 @@ impl Registers {
         }
     }
 
-    pub(crate) fn get(&self, register: Register) -> Value {
+    pub fn get(&self, register: Register) -> Value {
         match register {
             Register::A => Value::EightBit(self.a),
             Register::B => Value::EightBit(self.b),
@@ -116,27 +116,27 @@ impl Registers {
         }
     }
 
-    pub(crate) fn flags(&self) -> &FlagRegister {
+    pub fn flags(&self) -> &FlagRegister {
         &self.f
     }
 
-    pub(crate) fn inc_pc(&mut self, value: u16) {
+    pub fn inc_pc(&mut self, value: u16) {
         self.pc += value;
     }
 
-    pub(crate) fn af(&self) -> u16 {
+    pub fn af(&self) -> u16 {
         concat_bytes(self.a, self.f.get())
     }
 
-    pub(crate) fn bc(&self) -> u16 {
+    pub fn bc(&self) -> u16 {
         concat_bytes(self.b, self.c)
     }
 
-    pub(crate) fn de(&self) -> u16 {
+    pub fn de(&self) -> u16 {
         concat_bytes(self.d, self.e)
     }
 
-    pub(crate) fn hl(&self) -> u16 {
+    pub fn hl(&self) -> u16 {
         concat_bytes(self.h, self.l)
     }
 }

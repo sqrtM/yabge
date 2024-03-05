@@ -4,7 +4,7 @@ use crate::cpu::value::Value;
 use crate::cpu::CPU;
 
 impl CPU {
-    pub(crate) fn should_jump(&self, condition: JumpCondition) -> bool {
+    pub fn should_jump(&self, condition: JumpCondition) -> bool {
         match condition {
             JumpCondition::FlagOn(flag) => self.registers.f.is_set(flag),
             JumpCondition::FlagOff(flag) => !self.registers.f.is_set(flag),
@@ -12,7 +12,7 @@ impl CPU {
         }
     }
 
-    pub(crate) fn add(&mut self, a: Value, b: Value) -> Value {
+    pub fn add(&mut self, a: Value, b: Value) -> Value {
         if Self::check_half_carry_add(a, b) {
             self.registers.f.set(H);
         } else {
@@ -28,7 +28,7 @@ impl CPU {
         a + b
     }
 
-    pub(crate) fn sub(&mut self, a: Value, b: Value) -> Value {
+    pub fn sub(&mut self, a: Value, b: Value) -> Value {
         if Self::check_half_carry_sub(a, b) {
             self.registers.f.set(H);
         } else {
@@ -44,7 +44,7 @@ impl CPU {
         a - b
     }
 
-    pub(crate) fn rol(&mut self, a: Value, use_carry: bool) -> Value {
+    pub fn rol(&mut self, a: Value, use_carry: bool) -> Value {
         let result = match a {
             Value::EightBit(_) => {
                 let val = a.rotate_left();
@@ -81,7 +81,7 @@ impl CPU {
         result
     }
 
-    pub(crate) fn ror(&mut self, a: Value, use_carry: bool) -> Value {
+    pub fn ror(&mut self, a: Value, use_carry: bool) -> Value {
         let result = match a {
             Value::EightBit(_) => {
                 let val = a.rotate_right();
@@ -183,7 +183,7 @@ impl CPU {
 
 /// Bit manips to transmute u8/u16 to i16
 /// while maintaining the bit order.
-pub(crate) fn unsigned_to_signed(value: Value) -> i16 {
+pub fn unsigned_to_signed(value: Value) -> i16 {
     match value {
         Value::EightBit(a) => {
             if a & 0x80 != 0 {

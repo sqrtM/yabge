@@ -3,17 +3,17 @@ use crate::cpu::registers::Register::PC;
 use crate::cpu::registers::{Register, Registers};
 use crate::cpu::value::Value;
 
-mod arithmetic;
+pub mod arithmetic;
 pub mod flag;
-mod instruction;
-mod memory_bus;
-mod opcode;
+pub mod instruction;
+pub mod memory_bus;
+pub mod opcode;
 pub mod registers;
-pub(crate) mod value;
+pub mod value;
 
 #[derive(Default, Debug)]
 pub struct CPU {
-    registers: Registers,
+    pub registers: Registers,
     memory_bus: MemoryBus,
     clock: u64,
 }
@@ -64,11 +64,11 @@ impl CPU {
     }
 }
 
-pub(crate) fn concat_bytes(hi: u8, lo: u8) -> u16 {
+pub fn concat_bytes(hi: u8, lo: u8) -> u16 {
     (hi as u16) << 8 | lo as u16
 }
 
-pub(crate) fn split_bytes(value: u16) -> (u8, u8) {
+pub fn split_bytes(value: u16) -> (u8, u8) {
     let high_byte = (value >> 8) as u8;
     let low_byte = value as u8;
     (high_byte, low_byte)

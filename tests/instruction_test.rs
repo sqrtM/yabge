@@ -1,0 +1,527 @@
+use yabge::cpu::flag::Flag::{C, H, N, Z};
+use yabge::cpu::instruction::{
+    AdditionalInstruction, Instruction, InstructionLength, JumpCondition, JumpCycles,
+    RotateDirection,
+};
+use yabge::cpu::registers::Register;
+use yabge::cpu::registers::Register::{A, HL, PC, SP};
+use yabge::cpu::value::Value;
+use yabge::cpu::{MemoryLocation, CPU};
+
+#[test]
+fn test_load_reg() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(HL, Value::SixteenBit(0x1234));
+
+    let instruction = Instruction::Load {
+        to: MemoryLocation::Register(SP),
+        what: cpu.registers.get(HL),
+        additional_instruction: AdditionalInstruction::None,
+        cycles: 1,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x1234));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_add() {
+    let mut cpu: CPU = Default::default();
+
+    cpu.registers.set(A, Value::EightBit(0x3E));
+    cpu.registers.set(Register::B, Value::EightBit(0x23));
+
+    let instruction = Instruction::Add {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x61));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_adc_with_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.f.set(C);
+    cpu.registers.set(A, Value::EightBit(0x3E));
+    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    let instruction = Instruction::Adc {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x62));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_adc_no_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x3E));
+    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    let instruction = Instruction::Adc {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x61));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_sub() {
+    let mut cpu = CPU::default();
+
+    cpu.registers.set(A, Value::EightBit(0xF2));
+    cpu.registers.set(Register::B, Value::EightBit(0x1F));
+
+    let instruction = Instruction::Sub {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0xD3));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_sub_to_zero() {
+    let mut cpu = CPU::default();
+
+    cpu.registers.set(A, Value::EightBit(0x50));
+    cpu.registers.set(Register::B, Value::EightBit(0x50));
+
+    let instruction = Instruction::Sub {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x00));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+    assert!(cpu.registers.f.is_set(Z));
+}
+
+#[test]
+fn test_sbc_with_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.f.set(C);
+    cpu.registers.set(A, Value::EightBit(0x3E));
+    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    let instruction = Instruction::Sbc {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x1A));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_sbc_no_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x3E));
+    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    let instruction = Instruction::Sbc {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x1B));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_inc_eight_bit() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x3E));
+
+    let instruction = Instruction::Inc {
+        what: MemoryLocation::Register(A),
+        cycles: 4,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x3F));
+    assert!(!cpu.registers.f.is_set(N));
+}
+
+#[test]
+fn test_inc_sixteen_bit() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers
+        .set(Register::BC, Value::SixteenBit(0b0000_0000_1111_1111));
+
+    let instruction = Instruction::Inc {
+        what: MemoryLocation::Register(Register::BC),
+        cycles: 4,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(
+        cpu.registers.get(Register::BC),
+        Value::SixteenBit(0b0000_0001_0000_0000)
+    );
+    assert!(cpu.registers.f.is_set(H));
+    assert!(!cpu.registers.f.is_set(N));
+    assert!(!cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_dec_eight_bit() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0x00));
+
+    let instruction = Instruction::Dec {
+        what: MemoryLocation::Register(A),
+        cycles: 4,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0xFF));
+    assert!(cpu.registers.f.is_set(N));
+}
+
+#[test]
+fn test_dec_sixteen_bit() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(Register::BC, Value::SixteenBit(0x1234));
+
+    let instruction = Instruction::Dec {
+        what: MemoryLocation::Register(Register::BC),
+        cycles: 4,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1233));
+    assert!(cpu.registers.f.is_set(N));
+}
+
+#[test]
+fn test_rotate_left() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    let instruction = Instruction::Rot {
+        what: MemoryLocation::Register(A),
+        direction: RotateDirection::Left,
+        use_carry: false,
+        cycles: 4,
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1000_0111));
+    assert!(cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_rotate_right_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0010));
+    cpu.registers.f.set(C);
+    let instruction = Instruction::Rot {
+        what: MemoryLocation::Register(A),
+        direction: RotateDirection::Right,
+        use_carry: true,
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+    assert!(!cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_rotate_left_carry() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b0100_1000));
+    cpu.registers.f.set(C);
+    let instruction = Instruction::Rot {
+        what: MemoryLocation::Register(A),
+        direction: RotateDirection::Left,
+        use_carry: true,
+        cycles: 4,
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1001_0001));
+    assert!(!cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_jr() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0x1234));
+    cpu.registers.f.set(C);
+
+    let instruction = Instruction::Jr {
+        how_far: Value::EightBit(0b1001_1001),
+        condition: JumpCondition::FlagOn(C),
+        cycles: JumpCycles {
+            executed: 2,
+            not_executed: 3,
+        },
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x11CD));
+    assert!(cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_jp() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0x1234));
+
+    let instruction = Instruction::Jp {
+        to: Value::SixteenBit(0x5678),
+        condition: JumpCondition::FlagOff(Z),
+        cycles: JumpCycles {
+            executed: 2,
+            not_executed: 3,
+        },
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x5678));
+}
+
+#[test]
+fn test_daa_after_add_1() {
+    let mut cpu: CPU = Default::default();
+
+    // ADD
+    cpu.registers.set(A, Value::EightBit(0x54));
+    cpu.registers.set(Register::B, Value::EightBit(0x28));
+
+    let instruction = Instruction::Add {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x7C));
+    assert!(!cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x82));
+    assert!(!cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_daa_after_add_2() {
+    let mut cpu: CPU = Default::default();
+
+    // ADD
+    cpu.registers.set(A, Value::EightBit(0x98));
+    cpu.registers.set(Register::B, Value::EightBit(0x04));
+
+    let instruction = Instruction::Add {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x9C));
+    assert!(!cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x02));
+    assert!(cpu.registers.f.is_set(C));
+    assert!(!cpu.registers.f.is_set(H));
+}
+
+#[test]
+fn test_daa_after_add_3() {
+    let mut cpu: CPU = Default::default();
+
+    // ADD
+    cpu.registers.set(A, Value::EightBit(0x80));
+    cpu.registers.set(Register::B, Value::EightBit(0x90));
+
+    let instruction = Instruction::Add {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x10));
+    assert!(cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x70));
+}
+
+#[test]
+fn test_daa_after_add_4() {
+    let mut cpu: CPU = Default::default();
+
+    // ADD
+    cpu.registers.set(A, Value::EightBit(0x19));
+    cpu.registers.set(Register::B, Value::EightBit(0x28));
+
+    let instruction = Instruction::Add {
+        to: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x41));
+    assert!(cpu.registers.f.is_set(H));
+    assert!(!cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x47));
+}
+
+#[test]
+fn test_daa_after_sub_1() {
+    let mut cpu: CPU = Default::default();
+
+    // SUB
+    cpu.registers.set(A, Value::EightBit(0x47));
+    cpu.registers.set(Register::B, Value::EightBit(0x28));
+
+    let instruction = Instruction::Sub {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x1F));
+    assert!(cpu.registers.f.is_set(H));
+    assert!(!cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x19));
+}
+
+#[test]
+fn test_daa_after_sub_2() {
+    let mut cpu: CPU = Default::default();
+
+    // SUB
+    cpu.registers.set(A, Value::EightBit(0x20));
+    cpu.registers.set(Register::B, Value::EightBit(0x13));
+
+    let instruction = Instruction::Sub {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x0D));
+    assert!(cpu.registers.f.is_set(H));
+    assert!(!cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x07));
+}
+
+#[test]
+fn test_daa_after_sub_3() {
+    let mut cpu: CPU = Default::default();
+
+    // SUB
+    cpu.registers.set(A, Value::EightBit(0x05));
+    cpu.registers.set(Register::B, Value::EightBit(0x21));
+
+    let instruction = Instruction::Sub {
+        from: MemoryLocation::Register(A),
+        what: cpu.registers.get(Register::B),
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0xE4));
+    assert!(!cpu.registers.f.is_set(H));
+    assert!(cpu.registers.f.is_set(C));
+
+    // DAA Correction
+    cpu.execute(Instruction::Daa);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0x84));
+}
+
+#[test]
+fn test_cpl() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b0011_0101));
+    cpu.execute(Instruction::Cpl);
+
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1100_1010));
+}
+
+#[test]
+fn test_nop() {
+    let mut cpu: CPU = Default::default();
+    let instruction = Instruction::Nop;
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(1));
+}
+
+#[test]
+fn test_rotate_right() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1100_0011));
+    let instruction = Instruction::Rot {
+        what: MemoryLocation::Register(A),
+        direction: RotateDirection::Right,
+        use_carry: false,
+        cycles: 4,
+        length: InstructionLength::One,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+    assert!(cpu.registers.f.is_set(C));
+}
