@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Not, Sub};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub enum Value {
@@ -142,6 +142,17 @@ impl Sub<i16> for Value {
     }
 }
 
+impl Not for Value {
+    type Output = Value;
+
+    fn not(self) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(!a),
+            Value::SixteenBit(a) => Value::SixteenBit(!a),
+        }
+    }
+}
+
 impl Value {
     pub(crate) fn rotate_right(self) -> Self {
         match self {
@@ -182,5 +193,13 @@ mod tests {
         let b = Value::EightBit(0b1110_1000);
         let c = a | b;
         assert_eq!(c, Value::EightBit(0b1110_1010))
+    }
+
+    #[test]
+    fn test_not() {
+        let a = Value::EightBit(0b1010_0010);
+        let b = Value::SixteenBit(0b1110_1000);
+        assert_eq!(!a, Value::EightBit(0b0101_1101));
+        assert_eq!(!b, Value::SixteenBit(0b1111_1111_0001_0111u16))
     }
 }

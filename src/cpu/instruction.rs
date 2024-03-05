@@ -87,6 +87,9 @@ pub(crate) enum Instruction {
         length: InstructionLength,
     },
     Daa,
+    Cpl,
+    Scf,
+    Ccf,
     Nop,
 }
 
@@ -297,7 +300,6 @@ impl CPU {
                     self.clock += cycles.not_executed as u64;
                 }
             }
-            // TODO. I don't understand this particularly well, so this may not work as anticipated.
             Instruction::Daa => {
                 let mut result = self.registers.get(A);
                 // Previous operation was not subtraction
@@ -325,9 +327,31 @@ impl CPU {
                 self.registers.set(A, result);
                 self.check_zero_flag(result);
                 self.registers.f.unset(H);
+                self.registers.inc_pc(1);
+            }
+            Instruction::Cpl => {
+                self.registers.set(A, !self.registers.get(A));
+                self.clock += 1;
+                self.registers.f.set(H);
+                self.registers.f.set(N);
+                self.registers.inc_pc(1);
+            }
+            Instruction::Scf => {
+                self.registers.f.set(C);
+                self.clock += 1;
+                self.registers.inc_pc(1);
+            }
+            Instruction::Ccf => {
+                if self.registers.f.is_set(C) {
+                    self.registers.f.unset(C);
+                } else {
+                    self.registers.f.set(C);
+                }
+                self.clock += 1;
+                self.registers.inc_pc(1);
             }
             Instruction::Nop => {
-                self.clock += 4;
+                self.clock += 1;
                 self.registers.inc_pc(1);
             }
         }
@@ -843,6 +867,15 @@ mod tests {
         // DAA Correction
         cpu.execute(Instruction::Daa);
         assert_eq!(cpu.registers.get(A), Value::EightBit(0x84));
+    }
+
+    #[test]
+    fn test_cpl() {
+        let mut cpu: CPU = Default::default();
+        cpu.registers.set(A, Value::EightBit(0b0011_0101));
+        cpu.execute(Instruction::Cpl);
+
+        assert_eq!(cpu.registers.get(A), Value::EightBit(0b1100_1010));
     }
 
     #[test]
