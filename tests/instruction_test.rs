@@ -680,10 +680,7 @@ fn test_reti() {
     let mut cpu: CPU = Default::default();
     cpu.registers.set(PC, Value::SixteenBit(0x3535));
     cpu.registers.set(SP, Value::SixteenBit(0x2000));
-    assert_eq!(
-        cpu.read(Value::SixteenBit(0xFFFF), false),
-        Value::EightBit(0)
-    );
+    assert!(!cpu.ime());
 
     cpu.write(Value::SixteenBit(0x2000), Value::EightBit(0xB5));
     cpu.write(Value::SixteenBit(0x2001), Value::EightBit(0x18));
@@ -693,10 +690,7 @@ fn test_reti() {
 
     assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x2002));
     assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x18B5));
-    assert_eq!(
-        cpu.read(Value::SixteenBit(0xFFFF), false),
-        Value::EightBit(1)
-    );
+    assert!(cpu.ime());
 }
 
 #[test]

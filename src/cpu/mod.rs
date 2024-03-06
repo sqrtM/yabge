@@ -15,6 +15,7 @@ pub mod value;
 pub struct CPU {
     pub registers: Registers,
     memory_bus: MemoryBus,
+    ime: bool,
     clock: u64,
 }
 
@@ -63,6 +64,18 @@ impl CPU {
         } else {
             self.read(self.registers.get(PC) + Value::SixteenBit(1), false)
         }
+    }
+
+    pub fn set_ime(&mut self) {
+        self.ime = true;
+    }
+
+    pub fn unset_ime(&mut self) {
+        self.ime = false;
+    }
+
+    pub fn ime(&self) -> bool {
+        self.ime
     }
 }
 

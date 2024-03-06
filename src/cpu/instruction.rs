@@ -445,6 +445,7 @@ impl CPU {
                 }
             }
             Instruction::Reti => {
+                self.set_ime();
                 let lo = self.read(self.registers.get(SP), false);
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
@@ -452,7 +453,6 @@ impl CPU {
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                 self.registers.set(PC, concat_values(hi, lo));
-                self.write(Value::SixteenBit(0xFFFF), Value::EightBit(0x01));
                 self.clock += 4;
             }
             Instruction::Pop(reg) => {

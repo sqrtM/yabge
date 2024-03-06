@@ -10,7 +10,7 @@ pub struct MemoryBus {
     oam: [u8; 0xA0],                   // Object attribute memory (OAM)
     io_registers: [u8; 0x80],          // I/O Registers
     hram: [u8; 0x7F],                  // High RAM (HRAM)
-    interrupt_enable: bool,            // Interrupt Enable register (IE)
+    interrupt_enable: u8,              // Interrupt Enable register (IE)
 }
 
 impl Default for MemoryBus {
@@ -26,7 +26,7 @@ impl Default for MemoryBus {
             oam: [0; 0xA0],
             io_registers: [0; 0x80],
             hram: [0; 0x7F],
-            interrupt_enable: false,
+            interrupt_enable: 0u8,
         }
     }
 }
@@ -44,13 +44,7 @@ impl MemoryBus {
             0xFE00..=0xFE9F => self.oam[address as usize - 0xFE00],
             0xFF00..=0xFF7F => self.io_registers[address as usize - 0xFF00],
             0xFF80..=0xFFFE => self.hram[address as usize - 0xFF80],
-            0xFFFF => {
-                if self.interrupt_enable {
-                    1
-                } else {
-                    0
-                }
-            }
+            0xFFFF => self.interrupt_enable,
             _ => panic!("Invalid memory address: 0x{:04X}", address),
         }
     }
@@ -67,7 +61,7 @@ impl MemoryBus {
             0xFE00..=0xFE9F => self.oam[address as usize - 0xFE00] = data,
             0xFF00..=0xFF7F => self.io_registers[address as usize - 0xFF00] = data,
             0xFF80..=0xFFFE => self.hram[address as usize - 0xFF80] = data,
-            0xFFFF => self.interrupt_enable = data != 0,
+            0xFFFF => self.interrupt_enable = data,
             _ => panic!("Invalid memory address: 0x{:04X}", address),
         }
     }
