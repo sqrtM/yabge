@@ -101,6 +101,13 @@ pub enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Shift {
+        what: MemoryLocation,
+        direction: RotateDirection,
+        arithmetic: bool,
+        cycles: u8,
+        length: InstructionLength,
+    },
     Jr {
         how_far: Value,
         condition: Condition,
@@ -328,6 +335,34 @@ impl CPU {
                         let result = match direction {
                             RotateDirection::Right => self.ror(val, use_carry),
                             RotateDirection::Left => self.rol(val, use_carry),
+                        };
+                        self.write(addr, result);
+                    }
+                }
+                self.inc_clock(cycles);
+                self.registers.inc_pc(length.count());
+            }
+            Instruction::Shift {
+                what,
+                direction,
+                arithmetic,
+                cycles,
+                length,
+            } => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let val = self.registers.get(reg);
+                        let result = match direction {
+                            RotateDirection::Right => self.shr(val, arithmetic),
+                            RotateDirection::Left => self.shl(val),
+                        };
+                        self.registers.set(reg, result);
+                    }
+                    MemoryLocation::Pointer(addr) => {
+                        let val = self.read(addr, false);
+                        let result = match direction {
+                            RotateDirection::Right => self.shr(val, arithmetic),
+                            RotateDirection::Left => self.shl(val),
                         };
                         self.write(addr, result);
                     }

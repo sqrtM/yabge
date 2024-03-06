@@ -118,6 +118,50 @@ impl CPU {
         result
     }
 
+    pub fn shl(&mut self, a: Value) -> Value {
+        let result = match a {
+            Value::EightBit(_) => a << 1u8,
+            Value::SixteenBit(_) => a << 1u8,
+        };
+        if Self::check_carry_left_rotate(a) {
+            self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
+        }
+        self.registers.f.unset(N);
+        self.check_zero_flag(result);
+        result
+    }
+
+    pub fn shr(&mut self, a: Value, arithmetic: bool) -> Value {
+        let result = match a {
+            Value::EightBit(_) => {
+                if arithmetic {
+                    let val = a >> 1u8;
+                    val | Value::EightBit(0x80)
+                } else {
+                    a >> 1u8
+                }
+            }
+            Value::SixteenBit(_) => {
+                if arithmetic {
+                    let val = a >> 1u8;
+                    val | Value::SixteenBit(0x8000)
+                } else {
+                    a >> 1u8
+                }
+            }
+        };
+        if Self::check_carry_right_rotate(a) {
+            self.registers.f.set(C);
+        } else {
+            self.registers.f.unset(C);
+        }
+        self.registers.f.unset(N);
+        self.check_zero_flag(result);
+        result
+    }
+
     pub fn check_zero_flag(&mut self, a: Value) {
         if a == Value::EightBit(0) || a == Value::SixteenBit(0) {
             self.registers.f.set(Z)
@@ -205,6 +249,7 @@ pub fn unsigned_to_signed(value: Value) -> i16 {
 #[cfg(test)]
 mod tests {
     use crate::cpu::arithmetic::unsigned_to_signed;
+    use crate::cpu::flag::Flag::C;
     use crate::cpu::value::Value;
     use crate::cpu::CPU;
 
@@ -253,5 +298,32 @@ mod tests {
         assert_eq!(ia as i8, 0b1011_1101u8 as i8);
         assert_eq!(ib, -29457);
         assert_eq!(ib, 0b1000_1100_1110_1111u16 as i16);
+    }
+
+    #[test]
+    fn test_shl() {
+        let mut cpu = CPU::default();
+        let a = Value::EightBit(0b1011_1101);
+        let b = cpu.shl(a);
+        assert!(cpu.registers.f.is_set(C));
+        assert_eq!(b, Value::EightBit(0b0111_1010))
+    }
+
+    #[test]
+    fn test_srl() {
+        let mut cpu = CPU::default();
+        let a = Value::EightBit(0b1011_1101);
+        let b = cpu.shr(a, false);
+        assert!(cpu.registers.f.is_set(C));
+        assert_eq!(b, Value::EightBit(0b0101_1110))
+    }
+
+    #[test]
+    fn test_sra() {
+        let mut cpu = CPU::default();
+        let a = Value::EightBit(0b1011_1101);
+        let b = cpu.shr(a, true);
+        assert!(cpu.registers.f.is_set(C));
+        assert_eq!(b, Value::EightBit(0b1101_1110))
     }
 }

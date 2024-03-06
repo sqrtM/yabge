@@ -84,6 +84,28 @@ impl std::ops::BitAnd<Value> for Value {
     }
 }
 
+impl std::ops::Shl<u8> for Value {
+    type Output = Value;
+
+    fn shl(self, rhs: u8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a << rhs),
+            Value::SixteenBit(a) => Value::SixteenBit(a << rhs),
+        }
+    }
+}
+
+impl std::ops::Shr<u8> for Value {
+    type Output = Value;
+
+    fn shr(self, rhs: u8) -> Value {
+        match self {
+            Value::EightBit(a) => Value::EightBit(a >> rhs),
+            Value::SixteenBit(a) => Value::SixteenBit(a >> rhs),
+        }
+    }
+}
+
 impl std::ops::BitOr<Value> for Value {
     type Output = Value;
 
@@ -239,6 +261,14 @@ mod tests {
         let b = Value::SixteenBit(0b1110_1000);
         assert_eq!(!a, Value::EightBit(0b0101_1101));
         assert_eq!(!b, Value::SixteenBit(0b1111_1111_0001_0111u16))
+    }
+
+    #[test]
+    fn test_shl() {
+        let a = Value::EightBit(0b1010_0010);
+        let b = Value::SixteenBit(0b1110_1000);
+        assert_eq!(a << 1, Value::EightBit(0b0100_0100));
+        assert_eq!(b << 1, Value::SixteenBit(0b0000_0001_1101_0000u16))
     }
 
     #[test]
