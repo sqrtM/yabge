@@ -3,7 +3,8 @@ use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::{
     AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
-use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, L, SP};
+use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, L, PC, SP};
+use crate::cpu::value::Value;
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
@@ -1341,6 +1342,272 @@ impl CPU {
                 cycles: 1,
                 length: InstructionLength::One,
             },
+            // Prefixed Ops
+            0xCB => {
+                if let Value::EightBit(postfix) = self.read(self.registers.get(PC) + 1u16, false) {
+                    match postfix {
+                        // RLC B
+                        0x00 => Instruction::Rot {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC C
+                        0x01 => Instruction::Rot {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC D
+                        0x02 => Instruction::Rot {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC E
+                        0x03 => Instruction::Rot {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC H
+                        0x04 => Instruction::Rot {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC L
+                        0x05 => Instruction::Rot {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC (HL)
+                        0x06 => Instruction::Rot {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RLC A
+                        0x07 => Instruction::Rot {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Left,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC B
+                        0x08 => Instruction::Rot {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC C
+                        0x09 => Instruction::Rot {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC D
+                        0x0A => Instruction::Rot {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC E
+                        0x0B => Instruction::Rot {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC H
+                        0x0C => Instruction::Rot {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC L
+                        0x0D => Instruction::Rot {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC (HL)
+                        0x0E => Instruction::Rot {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RRC A
+                        0x0F => Instruction::Rot {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Right,
+                            use_carry: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL B
+                        0x10 => Instruction::Rot {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL C
+                        0x11 => Instruction::Rot {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL D
+                        0x12 => Instruction::Rot {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL E
+                        0x13 => Instruction::Rot {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL H
+                        0x14 => Instruction::Rot {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL L
+                        0x15 => Instruction::Rot {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL (HL)
+                        0x16 => Instruction::Rot {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RL A
+                        0x17 => Instruction::Rot {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Left,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR B
+                        0x18 => Instruction::Rot {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR C
+                        0x19 => Instruction::Rot {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR D
+                        0x1A => Instruction::Rot {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR E
+                        0x1B => Instruction::Rot {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR H
+                        0x1C => Instruction::Rot {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR L
+                        0x1D => Instruction::Rot {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR (HL)
+                        0x1E => Instruction::Rot {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // RR A
+                        0x1F => Instruction::Rot {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Right,
+                            use_carry: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        _ => Instruction::Nop,
+                    }
+                } else {
+                    panic!("Invalid Postfix OpCode value!")
+                }
+            }
             _ => Instruction::Nop,
         }
     }

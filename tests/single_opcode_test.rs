@@ -1,6 +1,6 @@
 use yabge::cpu::flag::Flag;
 use yabge::cpu::flag::Flag::Z;
-use yabge::cpu::registers::Register::{A, B, BC, C, DE, HL, PC, SP};
+use yabge::cpu::registers::Register::{A, B, BC, C, DE, HL, L, PC, SP};
 use yabge::cpu::value::Value;
 use yabge::cpu::CPU;
 
@@ -455,4 +455,86 @@ fn test_0x37() {
     }
 
     assert!(cpu.registers.f.is_set(Flag::C));
+}
+
+#[test]
+fn test_0xcb06() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x06));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+    cpu.write(Value::SixteenBit(0xCAFE), Value::EightBit(0b1101_1100));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xCAFE), false),
+        Value::EightBit(0b1011_1001)
+    );
+    assert!(cpu.registers.f.is_set(Flag::C))
+}
+
+#[test]
+fn test_0xcb0e() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x0E));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+    cpu.write(Value::SixteenBit(0xCAFE), Value::EightBit(0b0101_1101));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xCAFE), false),
+        Value::EightBit(0b1010_1110)
+    );
+    assert!(cpu.registers.f.is_set(Flag::C))
+}
+
+#[test]
+fn test_0xcb15() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x15));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCA3A));
+    cpu.registers.f.set(Flag::C);
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(cpu.registers.get(L), Value::EightBit(0b0111_0101));
+    assert!(!cpu.registers.f.is_set(Flag::C))
+}
+
+#[test]
+fn test_0xcb1e() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x1E));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+    cpu.registers.f.set(Flag::C);
+    cpu.write(Value::SixteenBit(0xCAFE), Value::EightBit(0b0101_1110));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xCAFE), false),
+        Value::EightBit(0b1010_1111)
+    );
+    assert!(!cpu.registers.f.is_set(Flag::C))
 }

@@ -148,6 +148,15 @@ pub enum Instruction {
     Nop,
 }
 
+pub enum PrefixedInstruction {
+    Sla,
+    Sra,
+    Swap,
+    Bit,
+    Res,
+    Set,
+}
+
 pub enum InstructionLength {
     One,
     Two,
@@ -308,19 +317,19 @@ impl CPU {
                 match what {
                     MemoryLocation::Register(reg) => {
                         let val = self.registers.get(reg);
-                        match direction {
-                            RotateDirection::Right => {
-                                let result = self.ror(val, use_carry);
-                                self.registers.set(reg, result);
-                            }
-                            RotateDirection::Left => {
-                                let result = self.rol(val, use_carry);
-                                self.registers.set(reg, result);
-                            }
-                        }
+                        let result = match direction {
+                            RotateDirection::Right => self.ror(val, use_carry),
+                            RotateDirection::Left => self.rol(val, use_carry),
+                        };
+                        self.registers.set(reg, result);
                     }
-                    MemoryLocation::Pointer(_) => {
-                        panic!("NOT IMPLEMENTED")
+                    MemoryLocation::Pointer(addr) => {
+                        let val = self.read(addr, false);
+                        let result = match direction {
+                            RotateDirection::Right => self.ror(val, use_carry),
+                            RotateDirection::Left => self.rol(val, use_carry),
+                        };
+                        self.write(addr, result);
                     }
                 }
                 self.inc_clock(cycles);

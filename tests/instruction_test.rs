@@ -248,17 +248,17 @@ fn test_rotate_left() {
 #[test]
 fn test_rotate_right_carry() {
     let mut cpu: CPU = Default::default();
-    cpu.registers.set(A, Value::EightBit(0b1100_0010));
+    cpu.registers.set(B, Value::EightBit(0b1100_0010));
     cpu.registers.f.set(C);
     let instruction = Instruction::Rot {
-        what: MemoryLocation::Register(A),
+        what: MemoryLocation::Register(B),
         direction: RotateDirection::Right,
         use_carry: true,
         cycles: 4,
         length: InstructionLength::One,
     };
     cpu.execute(instruction);
-    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1110_0001));
+    assert_eq!(cpu.registers.get(B), Value::EightBit(0b1110_0001));
     assert!(!cpu.registers.f.is_set(C));
 }
 
