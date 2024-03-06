@@ -1,5 +1,6 @@
 use yabge::cpu::flag::Flag::{C, H, N, Z};
 use yabge::cpu::instruction::Condition::FlagOn;
+use yabge::cpu::instruction::RstAddress::{Three, Two};
 use yabge::cpu::instruction::{
     AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
@@ -748,4 +749,20 @@ fn test_call() {
     );
     assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x3000));
     assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x2135));
+}
+
+#[test]
+fn test_rst() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0x15B3));
+
+    let instruction = Instruction::Rst(Three);
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x0018));
+
+    let instruction = Instruction::Rst(Two);
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x0010));
 }

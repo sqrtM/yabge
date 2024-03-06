@@ -4,7 +4,7 @@ use crate::cpu::flag::Flag::{C, H, N};
 use crate::cpu::registers::Register;
 use crate::cpu::registers::Register::{A, HL, PC, SP};
 use crate::cpu::value::{concat_values, Value};
-use crate::cpu::{concat_bytes, MemoryLocation, CPU};
+use crate::cpu::{MemoryLocation, CPU};
 
 pub enum RotateDirection {
     Right,
@@ -26,6 +26,32 @@ pub enum AdditionalInstruction {
     Inc,
     Dec,
     None,
+}
+
+pub enum RstAddress {
+    Zero,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+}
+
+impl RstAddress {
+    fn new_pc(&self) -> Value {
+        match self {
+            RstAddress::Zero => Value::SixteenBit(0x0000),
+            RstAddress::One => Value::SixteenBit(0x0008),
+            RstAddress::Two => Value::SixteenBit(0x0010),
+            RstAddress::Three => Value::SixteenBit(0x0018),
+            RstAddress::Four => Value::SixteenBit(0x0020),
+            RstAddress::Five => Value::SixteenBit(0x0028),
+            RstAddress::Six => Value::SixteenBit(0x0030),
+            RstAddress::Seven => Value::SixteenBit(0x0038),
+        }
+    }
 }
 
 pub enum Instruction {
@@ -116,6 +142,7 @@ pub enum Instruction {
     Pop(Register),
     Push(Register),
     Call(Condition),
+    Rst(RstAddress),
     Nop,
 }
 
@@ -494,6 +521,18 @@ impl CPU {
                 } else {
                     self.clock += 3;
                 }
+            }
+            Instruction::Rst(addr) => {
+                // Inc PC before instruction
+                self.registers.set(PC, self.registers.get(PC) + 1u16);
+
+                self.registers.set(SP, self.registers.get(SP) - 1u16);
+                self.write(self.registers.get(SP), self.registers.get(PC).high_byte());
+
+                self.registers.set(SP, self.registers.get(SP) - 1u16);
+                self.write(self.registers.get(SP), self.registers.get(PC).low_byte());
+
+                self.registers.set(PC, addr.new_pc());
             }
             Instruction::Nop => {
                 self.clock += 1;
