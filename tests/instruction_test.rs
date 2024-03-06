@@ -766,3 +766,19 @@ fn test_rst() {
 
     assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x0010));
 }
+
+#[test]
+fn test_ei() {
+    let mut cpu: CPU = Default::default();
+    let instruction = Instruction::Ei;
+    cpu.execute(instruction);
+    assert!(cpu.ime());
+}
+
+#[test]
+fn test_di() {
+    let mut cpu: CPU = Default::default();
+    let instruction = Instruction::Di;
+    cpu.execute(instruction);
+    assert!(!cpu.ime());
+}

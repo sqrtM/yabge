@@ -143,6 +143,8 @@ pub enum Instruction {
     Push(Register),
     Call(Condition),
     Rst(RstAddress),
+    Ei,
+    Di,
     Nop,
 }
 
@@ -185,7 +187,7 @@ impl CPU {
                     }
                     AdditionalInstruction::None => {}
                 }
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Add {
@@ -201,7 +203,7 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Adc {
@@ -223,7 +225,7 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Sub {
@@ -239,7 +241,7 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Sbc {
@@ -262,7 +264,7 @@ impl CPU {
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.registers.f.set(N);
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Inc { what, cycles } => {
@@ -277,7 +279,7 @@ impl CPU {
                     }
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(1);
             }
             Instruction::Dec { what, cycles } => {
@@ -293,7 +295,7 @@ impl CPU {
                     _ => panic!("NOT IMPLEMENTED!!!!"),
                 };
                 self.registers.f.set(N);
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(1);
             }
             Instruction::Rot {
@@ -321,7 +323,7 @@ impl CPU {
                         panic!("NOT IMPLEMENTED")
                     }
                 }
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
             }
             Instruction::Jr {
@@ -333,10 +335,10 @@ impl CPU {
                 if self.condition_passes(condition) {
                     let new_location = self.registers.get(PC) + unsigned_to_signed(how_far);
                     self.registers.set(PC, new_location);
-                    self.clock += cycles.executed as u64;
+                    self.inc_clock(cycles.executed);
                 } else {
                     self.registers.inc_pc(length.count());
-                    self.clock += cycles.not_executed as u64;
+                    self.inc_clock(cycles.not_executed);
                 }
             }
             Instruction::Jp {
@@ -347,10 +349,10 @@ impl CPU {
             } => {
                 if self.condition_passes(condition) {
                     self.registers.set(PC, to);
-                    self.clock += cycles.executed as u64;
+                    self.inc_clock(cycles.executed);
                 } else {
                     self.registers.inc_pc(length.count());
-                    self.clock += cycles.not_executed as u64;
+                    self.inc_clock(cycles.not_executed);
                 }
             }
             Instruction::And {
@@ -366,7 +368,7 @@ impl CPU {
                 self.registers.f.unset(C);
                 self.check_zero_flag(result);
                 self.registers.inc_pc(length.count());
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
             }
             Instruction::Xor {
                 what,
@@ -380,7 +382,7 @@ impl CPU {
                 self.registers.f.unset(H);
                 self.check_zero_flag(result);
                 self.registers.inc_pc(length.count());
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
             }
             Instruction::Or {
                 what,
@@ -394,7 +396,7 @@ impl CPU {
                 self.registers.f.unset(C);
                 self.registers.f.unset(H);
                 self.registers.inc_pc(length.count());
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
             }
             Instruction::Cp {
                 what,
@@ -404,7 +406,7 @@ impl CPU {
                 let result = self.sub(self.registers.get(A), what);
                 self.check_zero_flag(result);
                 self.registers.inc_pc(length.count());
-                self.clock += cycles as u64;
+                self.inc_clock(cycles);
             }
             Instruction::Daa => {
                 let mut result = self.registers.get(A);
@@ -437,14 +439,14 @@ impl CPU {
             }
             Instruction::Cpl => {
                 self.registers.set(A, !self.registers.get(A));
-                self.clock += 1;
+                self.inc_clock(1);
                 self.registers.f.set(H);
                 self.registers.f.set(N);
                 self.registers.inc_pc(1);
             }
             Instruction::Scf => {
                 self.registers.f.set(C);
-                self.clock += 1;
+                self.inc_clock(1);
                 self.registers.inc_pc(1);
             }
             Instruction::Ccf => {
@@ -453,7 +455,7 @@ impl CPU {
                 } else {
                     self.registers.f.set(C);
                 }
-                self.clock += 1;
+                self.inc_clock(1);
                 self.registers.inc_pc(1);
             }
             Instruction::Ret(condition) => {
@@ -465,9 +467,9 @@ impl CPU {
                     self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                     self.registers.set(PC, concat_values(hi, lo));
-                    self.clock += 5;
+                    self.inc_clock(5);
                 } else {
-                    self.clock += 2;
+                    self.inc_clock(2);
                     self.registers.inc_pc(1);
                 }
             }
@@ -480,7 +482,7 @@ impl CPU {
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                 self.registers.set(PC, concat_values(hi, lo));
-                self.clock += 4;
+                self.inc_clock(4);
             }
             Instruction::Pop(reg) => {
                 let lo = self.read(self.registers.get(SP), false);
@@ -490,7 +492,7 @@ impl CPU {
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                 self.registers.set(reg, concat_values(hi, lo));
-                self.clock += 4;
+                self.inc_clock(4);
                 self.registers.inc_pc(1);
             }
             Instruction::Push(reg) => {
@@ -500,7 +502,7 @@ impl CPU {
                 self.registers.set(SP, self.registers.get(SP) - 1u16);
                 self.write(self.registers.get(SP), self.registers.get(reg).low_byte());
 
-                self.clock += 4;
+                self.inc_clock(4);
                 self.registers.inc_pc(1);
             }
             Instruction::Call(condition) => {
@@ -517,9 +519,9 @@ impl CPU {
                     self.registers
                         .set(PC, self.read(pc_before_execution + 1u16, true));
 
-                    self.clock += 6;
+                    self.inc_clock(6);
                 } else {
-                    self.clock += 3;
+                    self.inc_clock(3);
                 }
             }
             Instruction::Rst(addr) => {
@@ -534,8 +536,18 @@ impl CPU {
 
                 self.registers.set(PC, addr.new_pc());
             }
+            Instruction::Ei => {
+                self.set_ime_next();
+                self.registers.inc_pc(1);
+                self.inc_clock(1)
+            }
+            Instruction::Di => {
+                self.unset_ime();
+                self.registers.inc_pc(1);
+                self.inc_clock(1)
+            }
             Instruction::Nop => {
-                self.clock += 1;
+                self.inc_clock(1);
                 self.registers.inc_pc(1);
             }
         }

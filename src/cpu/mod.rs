@@ -16,6 +16,7 @@ pub struct CPU {
     pub registers: Registers,
     memory_bus: MemoryBus,
     ime: bool,
+    ime_next: bool,
     clock: u64,
 }
 
@@ -64,6 +65,28 @@ impl CPU {
         } else {
             self.read(self.registers.get(PC) + Value::SixteenBit(1), false)
         }
+    }
+
+    pub fn inc_clock(&mut self, cycles: u8) {
+        for _ in 0..cycles {
+            self.clock += 1;
+            if self.ime_next {
+                self.set_ime();
+                self.unset_ime_next();
+            }
+        }
+    }
+
+    pub fn set_ime_next(&mut self) {
+        self.ime_next = true;
+    }
+
+    pub fn unset_ime_next(&mut self) {
+        self.ime_next = false;
+    }
+
+    pub fn ime_next(&self) -> bool {
+        self.ime_next
     }
 
     pub fn set_ime(&mut self) {
