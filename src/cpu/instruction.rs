@@ -135,6 +135,7 @@ pub enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Swap(MemoryLocation),
     Cp {
         what: Value,
         cycles: u8,
@@ -441,6 +442,25 @@ impl CPU {
                 self.registers.f.unset(H);
                 self.registers.inc_pc(length.count());
                 self.inc_clock(cycles);
+            }
+            Instruction::Swap(what) => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let val = self.registers.get(reg);
+                        let result = val.swap();
+                        self.registers.set(reg, result);
+                        self.check_zero_flag(result);
+                        self.inc_clock(2);
+                    }
+                    MemoryLocation::Pointer(addr) => {
+                        let val = self.read(addr, false);
+                        let result = val.swap();
+                        self.write(addr, result);
+                        self.check_zero_flag(result);
+                        self.inc_clock(4);
+                    }
+                }
+                self.registers.inc_pc(2);
             }
             Instruction::Cp {
                 what,

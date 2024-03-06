@@ -90,11 +90,11 @@ fn test_sub() {
     let mut cpu = CPU::default();
 
     cpu.registers.set(A, Value::EightBit(0xF2));
-    cpu.registers.set(Register::B, Value::EightBit(0x1F));
+    cpu.registers.set(B, Value::EightBit(0x1F));
 
     let instruction = Instruction::Sub {
         from: MemoryLocation::Register(A),
-        what: cpu.registers.get(Register::B),
+        what: cpu.registers.get(B),
         cycles: 4,
         length: InstructionLength::One,
     };
@@ -110,11 +110,11 @@ fn test_sub_to_zero() {
     let mut cpu = CPU::default();
 
     cpu.registers.set(A, Value::EightBit(0x50));
-    cpu.registers.set(Register::B, Value::EightBit(0x50));
+    cpu.registers.set(B, Value::EightBit(0x50));
 
     let instruction = Instruction::Sub {
         from: MemoryLocation::Register(A),
-        what: cpu.registers.get(Register::B),
+        what: cpu.registers.get(B),
         cycles: 4,
         length: InstructionLength::One,
     };
@@ -131,10 +131,10 @@ fn test_sbc_with_carry() {
     let mut cpu: CPU = Default::default();
     cpu.registers.f.set(C);
     cpu.registers.set(A, Value::EightBit(0x3E));
-    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    cpu.registers.set(B, Value::EightBit(0x23));
     let instruction = Instruction::Sbc {
         from: MemoryLocation::Register(A),
-        what: cpu.registers.get(Register::B),
+        what: cpu.registers.get(B),
         cycles: 4,
         length: InstructionLength::One,
     };
@@ -149,10 +149,10 @@ fn test_sbc_with_carry() {
 fn test_sbc_no_carry() {
     let mut cpu: CPU = Default::default();
     cpu.registers.set(A, Value::EightBit(0x3E));
-    cpu.registers.set(Register::B, Value::EightBit(0x23));
+    cpu.registers.set(B, Value::EightBit(0x23));
     let instruction = Instruction::Sbc {
         from: MemoryLocation::Register(A),
-        what: cpu.registers.get(Register::B),
+        what: cpu.registers.get(B),
         cycles: 4,
         length: InstructionLength::One,
     };
@@ -182,10 +182,10 @@ fn test_inc_eight_bit() {
 fn test_inc_sixteen_bit() {
     let mut cpu: CPU = Default::default();
     cpu.registers
-        .set(Register::BC, Value::SixteenBit(0b0000_0000_1111_1111));
+        .set(BC, Value::SixteenBit(0b0000_0000_1111_1111));
 
     let instruction = Instruction::Inc {
-        what: MemoryLocation::Register(Register::BC),
+        what: MemoryLocation::Register(BC),
         cycles: 4,
     };
     cpu.execute(instruction);
@@ -217,15 +217,15 @@ fn test_dec_eight_bit() {
 #[test]
 fn test_dec_sixteen_bit() {
     let mut cpu: CPU = Default::default();
-    cpu.registers.set(Register::BC, Value::SixteenBit(0x1234));
+    cpu.registers.set(BC, Value::SixteenBit(0x1234));
 
     let instruction = Instruction::Dec {
-        what: MemoryLocation::Register(Register::BC),
+        what: MemoryLocation::Register(BC),
         cycles: 4,
     };
     cpu.execute(instruction);
 
-    assert_eq!(cpu.registers.get(Register::BC), Value::SixteenBit(0x1233));
+    assert_eq!(cpu.registers.get(BC), Value::SixteenBit(0x1233));
     assert!(cpu.registers.f.is_set(N));
 }
 
@@ -607,6 +607,63 @@ fn test_or() {
 }
 
 #[test]
+fn test_swap() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(HL, Value::SixteenBit(0xFACE));
+    cpu.write(Value::SixteenBit(0xFACE), Value::EightBit(0b1011_1010));
+
+    let instruction = Instruction::Swap(MemoryLocation::Pointer(cpu.registers.get(HL)));
+    cpu.execute(instruction);
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFACE), false),
+        Value::EightBit(0b1010_1011)
+    );
+
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b1111_0111));
+    let instruction = Instruction::Swap(MemoryLocation::Register(A));
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b0111_1111));
+}
+
+#[test]
+fn test_shift() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(HL, Value::SixteenBit(0xFACE));
+    cpu.write(Value::SixteenBit(0xFACE), Value::EightBit(0b1011_1010));
+
+    let instruction = Instruction::Shift {
+        what: MemoryLocation::Pointer(cpu.registers.get(HL)),
+        direction: RotateDirection::Right,
+        arithmetic: true,
+        cycles: 2,
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFACE), false),
+        Value::EightBit(0b1101_1101)
+    );
+
+    // -- // -- // -- //
+
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b0011_0111));
+    let instruction = Instruction::Shift {
+        what: MemoryLocation::Register(A),
+        direction: RotateDirection::Left,
+        arithmetic: false,
+        cycles: 2,
+        length: InstructionLength::Two,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b0110_1110));
+}
+
+#[test]
 fn test_cp() {
     let mut cpu: CPU = Default::default();
     cpu.registers.set(A, Value::EightBit(0x20));
@@ -650,7 +707,9 @@ fn test_ret() {
     assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x2002));
     assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x18B5));
     assert!(cpu.registers.f.is_set(Z));
+
     // -- // -- // -- //
+
     let mut cpu: CPU = Default::default();
     cpu.registers.set(PC, Value::SixteenBit(0xCAFD));
     cpu.registers.set(SP, Value::SixteenBit(0xFACE));

@@ -229,6 +229,19 @@ impl Value {
     }
 }
 
+impl Value {
+    pub fn swap(&self) -> Value {
+        match *self {
+            Value::EightBit(val) => {
+                let upper_nibble = (val & 0xF0) >> 4;
+                let lower_nibble = (val & 0x0F) << 4;
+                Value::EightBit(upper_nibble | lower_nibble)
+            }
+            _ => panic!("Swap operation is only applicable to 8-bit values"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -281,5 +294,15 @@ mod tests {
     fn test_low_byte() {
         let a = Value::SixteenBit(0b1010_0010_1110_1011);
         assert_eq!(a.low_byte(), Value::EightBit(0b1110_1011));
+    }
+
+    #[test]
+    fn test_swap() {
+        let a = Value::EightBit(0b1010_0010);
+        let b = Value::EightBit(0b1111_0000);
+        let c = Value::EightBit(0b0000_0100);
+        assert_eq!(a.swap(), Value::EightBit(0b0010_1010));
+        assert_eq!(b.swap(), Value::EightBit(0b0000_1111));
+        assert_eq!(c.swap(), Value::EightBit(0b0100_0000));
     }
 }
