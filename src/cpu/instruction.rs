@@ -1,6 +1,7 @@
 use crate::cpu::arithmetic::unsigned_to_signed;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::{C, H, N};
+use crate::cpu::registers::Register;
 use crate::cpu::registers::Register::{A, HL, PC, SP};
 use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{concat_bytes, MemoryLocation, CPU};
@@ -112,6 +113,8 @@ pub enum Instruction {
     Ccf,
     Ret(Condition),
     Reti,
+    Pop(Register),
+    Push(Register),
     Nop,
 }
 
@@ -427,10 +430,10 @@ impl CPU {
             }
             Instruction::Ret(condition) => {
                 if self.condition_passes(condition) {
-                    let hi = self.read(self.registers.get(SP), false);
+                    let lo = self.read(self.registers.get(SP), false);
                     self.registers.set(SP, self.registers.get(SP) + 1u16);
 
-                    let lo = self.read(self.registers.get(SP), false);
+                    let hi = self.read(self.registers.get(SP), false);
                     self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                     self.registers.set(PC, concat_values(hi, lo));
@@ -441,15 +444,36 @@ impl CPU {
                 }
             }
             Instruction::Reti => {
-                let hi = self.read(self.registers.get(SP), false);
+                let lo = self.read(self.registers.get(SP), false);
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
-                let lo = self.read(self.registers.get(SP), false);
+                let hi = self.read(self.registers.get(SP), false);
                 self.registers.set(SP, self.registers.get(SP) + 1u16);
 
                 self.registers.set(PC, concat_values(hi, lo));
                 self.write(Value::SixteenBit(0xFFFF), Value::EightBit(0x01));
                 self.clock += 4;
+            }
+            Instruction::Pop(reg) => {
+                let lo = self.read(self.registers.get(SP), false);
+                self.registers.set(SP, self.registers.get(SP) + 1u16);
+
+                let hi = self.read(self.registers.get(SP), false);
+                self.registers.set(SP, self.registers.get(SP) + 1u16);
+
+                self.registers.set(reg, concat_values(hi, lo));
+                self.clock += 4;
+                self.registers.inc_pc(1);
+            }
+            Instruction::Push(reg) => {
+                self.registers.set(SP, self.registers.get(SP) - 1u16);
+                self.write(self.registers.get(SP), self.registers.get(reg).high_byte());
+
+                self.registers.set(SP, self.registers.get(SP) - 1u16);
+                self.write(self.registers.get(SP), self.registers.get(reg).low_byte());
+
+                self.clock += 4;
+                self.registers.inc_pc(1);
             }
             Instruction::Nop => {
                 self.clock += 1;

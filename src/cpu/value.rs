@@ -191,6 +191,22 @@ impl Value {
     }
 }
 
+impl Value {
+    pub fn high_byte(&self) -> Value {
+        match self {
+            Value::EightBit(_) => panic!("Attempting to take high byte from u8"),
+            Value::SixteenBit(val) => Value::EightBit(((*val >> 8) & 0xFF) as u8),
+        }
+    }
+
+    pub fn low_byte(&self) -> Value {
+        match self {
+            Value::EightBit(_) => panic!("Attempting to take low byte from u8"),
+            Value::SixteenBit(val) => Value::EightBit((*val & 0xFF) as u8),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -223,5 +239,17 @@ mod tests {
         let b = Value::SixteenBit(0b1110_1000);
         assert_eq!(!a, Value::EightBit(0b0101_1101));
         assert_eq!(!b, Value::SixteenBit(0b1111_1111_0001_0111u16))
+    }
+
+    #[test]
+    fn test_high_byte() {
+        let a = Value::SixteenBit(0b1010_0010_1110_1011);
+        assert_eq!(a.high_byte(), Value::EightBit(0b1010_0010));
+    }
+
+    #[test]
+    fn test_low_byte() {
+        let a = Value::SixteenBit(0b1010_0010_1110_1011);
+        assert_eq!(a.low_byte(), Value::EightBit(0b1110_1011));
     }
 }

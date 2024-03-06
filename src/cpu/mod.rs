@@ -24,6 +24,8 @@ pub enum MemoryLocation {
     Pointer(Value),
 }
 
+// Ensure that these read and write commands are correct.
+// I think they are, but the Endianness is a little confusing.
 impl CPU {
     pub fn read(&self, addr: Value, two_bytes: bool) -> Value {
         let val = match addr {

@@ -419,6 +419,28 @@ fn test_0x36() {
         cpu.read(cpu.registers.get(HL), false),
         Value::EightBit(0xAB)
     );
+
+    // -- // -- // -- //
+
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x00), Value::EightBit(0x36));
+    cpu.write(Value::SixteenBit(0x01), Value::EightBit(0x28));
+    cpu.registers.set(HL, Value::SixteenBit(0x4444));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0x4444), false),
+        Value::EightBit(0x28)
+    );
+    assert_eq!(
+        cpu.read(cpu.registers.get(HL), false),
+        Value::EightBit(0x28)
+    );
 }
 
 #[test]
