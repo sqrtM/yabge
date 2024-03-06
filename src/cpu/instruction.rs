@@ -115,6 +115,7 @@ pub enum Instruction {
     Reti,
     Pop(Register),
     Push(Register),
+    Call(Condition),
     Nop,
 }
 
@@ -474,6 +475,25 @@ impl CPU {
 
                 self.clock += 4;
                 self.registers.inc_pc(1);
+            }
+            Instruction::Call(condition) => {
+                let pc_before_execution = self.registers.get(PC);
+                self.registers.set(PC, pc_before_execution + 3u16);
+
+                if self.condition_passes(condition) {
+                    self.registers.set(SP, self.registers.get(SP) - 1u16);
+                    self.write(self.registers.get(SP), self.registers.get(PC).high_byte());
+
+                    self.registers.set(SP, self.registers.get(SP) - 1u16);
+                    self.write(self.registers.get(SP), self.registers.get(PC).low_byte());
+
+                    self.registers
+                        .set(PC, self.read(pc_before_execution + 1u16, true));
+
+                    self.clock += 6;
+                } else {
+                    self.clock += 3;
+                }
             }
             Instruction::Nop => {
                 self.clock += 1;

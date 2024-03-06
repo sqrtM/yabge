@@ -733,3 +733,25 @@ fn test_push() {
     );
     assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x1005));
 }
+
+#[test]
+fn test_call() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.f.set(C);
+    cpu.registers.set(PC, Value::SixteenBit(0x1A47));
+    cpu.registers.set(SP, Value::SixteenBit(0x3002));
+
+    cpu.write(Value::SixteenBit(0x1A47), Value::EightBit(0xD4));
+    cpu.write(Value::SixteenBit(0x1A48), Value::EightBit(0x35));
+    cpu.write(Value::SixteenBit(0x1A49), Value::EightBit(0x21));
+
+    let instruction = Instruction::Call(FlagOn(C));
+    cpu.execute(instruction);
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0x3000), false),
+        Value::EightBit(0x4A)
+    );
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x3000));
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x2135));
+}
