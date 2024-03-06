@@ -1,14 +1,14 @@
 use crate::cpu::flag::Flag::{C, H, N, Z};
-use crate::cpu::instruction::JumpCondition;
+use crate::cpu::instruction::Condition;
 use crate::cpu::value::Value;
 use crate::cpu::CPU;
 
 impl CPU {
-    pub fn should_jump(&self, condition: JumpCondition) -> bool {
+    pub fn condition_passes(&self, condition: Condition) -> bool {
         match condition {
-            JumpCondition::FlagOn(flag) => self.registers.f.is_set(flag),
-            JumpCondition::FlagOff(flag) => !self.registers.f.is_set(flag),
-            JumpCondition::None => true,
+            Condition::FlagOn(flag) => self.registers.f.is_set(flag),
+            Condition::FlagOff(flag) => !self.registers.f.is_set(flag),
+            Condition::None => true,
         }
     }
 

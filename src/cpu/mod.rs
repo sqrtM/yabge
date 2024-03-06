@@ -31,10 +31,10 @@ impl CPU {
             Value::SixteenBit(a) => a,
         };
         if two_bytes {
-            let byte_one = self.memory_bus.read(val);
-            let byte_two = self.memory_bus.read(val + 1);
+            let lo = self.memory_bus.read(val);
+            let hi = self.memory_bus.read(val + 1);
             // Little Endian, the first bit is low, second is high
-            Value::SixteenBit(concat_bytes(byte_two, byte_one))
+            Value::SixteenBit(concat_bytes(hi, lo))
         } else {
             Value::EightBit(self.memory_bus.read(val))
         }

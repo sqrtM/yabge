@@ -1,7 +1,7 @@
 use yabge::cpu::flag::Flag::{C, H, N, Z};
+use yabge::cpu::instruction::Condition::FlagOn;
 use yabge::cpu::instruction::{
-    AdditionalInstruction, Instruction, InstructionLength, JumpCondition, JumpCycles,
-    RotateDirection,
+    AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
 use yabge::cpu::registers::Register;
 use yabge::cpu::registers::Register::{A, B, HL, PC, SP};
@@ -286,7 +286,7 @@ fn test_jr() {
 
     let instruction = Instruction::Jr {
         how_far: Value::EightBit(0b1001_1001),
-        condition: JumpCondition::FlagOn(C),
+        condition: Condition::FlagOn(C),
         cycles: JumpCycles {
             executed: 2,
             not_executed: 3,
@@ -305,7 +305,7 @@ fn test_jp() {
 
     let instruction = Instruction::Jp {
         to: Value::SixteenBit(0x5678),
-        condition: JumpCondition::FlagOff(Z),
+        condition: Condition::FlagOff(Z),
         cycles: JumpCycles {
             executed: 2,
             not_executed: 3,
@@ -631,4 +631,67 @@ fn test_cp() {
     cpu.execute(instruction);
     assert_eq!(cpu.registers.get(A), Value::EightBit(0x30));
     assert!(cpu.registers.f.is_set(Z))
+}
+
+#[test]
+fn test_ret() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0x3535));
+    cpu.registers.set(SP, Value::SixteenBit(0x2000));
+    cpu.registers.f.set(Z);
+
+    cpu.write(Value::SixteenBit(0x2000), Value::SixteenBit(0xB518));
+
+    let instruction = Instruction::Ret(FlagOn(Z));
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x2002));
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x18B5));
+    assert!(cpu.registers.f.is_set(Z));
+    // -- // -- // -- //
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0xCAFD));
+    cpu.registers.set(SP, Value::SixteenBit(0xFACE));
+    cpu.registers.f.set(Z);
+
+    cpu.write(Value::SixteenBit(0xFACE), Value::SixteenBit(0xADBE));
+
+    let instruction = Instruction::Ret(FlagOn(C));
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0xFACE));
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0xCAFE));
+    assert!(cpu.registers.f.is_set(Z));
+
+    cpu.registers.f.set(C);
+    let instruction = Instruction::Ret(FlagOn(C));
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0xFAD0));
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0xBEAD));
+    assert!(cpu.registers.f.is_set(Z));
+    assert!(cpu.registers.f.is_set(C));
+}
+
+#[test]
+fn test_reti() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0x3535));
+    cpu.registers.set(SP, Value::SixteenBit(0x2000));
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFFFF), false),
+        Value::EightBit(0)
+    );
+
+    cpu.write(Value::SixteenBit(0x2000), Value::SixteenBit(0xB518));
+
+    let instruction = Instruction::Reti;
+    cpu.execute(instruction);
+
+    assert_eq!(cpu.registers.get(SP), Value::SixteenBit(0x2002));
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x18B5));
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFFFF), false),
+        Value::EightBit(1)
+    );
 }

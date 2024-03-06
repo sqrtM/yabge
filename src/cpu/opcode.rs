@@ -1,8 +1,7 @@
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::{
-    AdditionalInstruction, Instruction, InstructionLength, JumpCondition, JumpCycles,
-    RotateDirection,
+    AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
 use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, L, SP};
 use crate::cpu::{MemoryLocation, CPU};
@@ -165,7 +164,7 @@ impl CPU {
             // JR s8
             0x18 => Instruction::Jr {
                 how_far: self.immediate_operand(false),
-                condition: JumpCondition::None,
+                condition: Condition::None,
                 cycles: JumpCycles {
                     executed: 3,
                     not_executed: 3,
@@ -221,7 +220,7 @@ impl CPU {
             // JR NZ, s8
             0x20 => Instruction::Jr {
                 how_far: self.immediate_operand(false),
-                condition: JumpCondition::FlagOff(Z),
+                condition: Condition::FlagOff(Z),
                 cycles: JumpCycles {
                     executed: 3,
                     not_executed: 2,
@@ -272,7 +271,7 @@ impl CPU {
             // JR Z, s8
             0x28 => Instruction::Jr {
                 how_far: self.immediate_operand(false),
-                condition: JumpCondition::FlagOn(Z),
+                condition: Condition::FlagOn(Z),
                 cycles: JumpCycles {
                     executed: 3,
                     not_executed: 2,
@@ -322,7 +321,7 @@ impl CPU {
             // JP NC, s8
             0x30 => Instruction::Jr {
                 how_far: self.immediate_operand(false),
-                condition: JumpCondition::FlagOff(Flag::C),
+                condition: Condition::FlagOff(Flag::C),
                 cycles: JumpCycles {
                     executed: 3,
                     not_executed: 2,
@@ -373,7 +372,7 @@ impl CPU {
             // JR C, s8
             0x38 => Instruction::Jr {
                 how_far: self.immediate_operand(false),
-                condition: JumpCondition::FlagOn(Flag::C),
+                condition: Condition::FlagOn(Flag::C),
                 cycles: JumpCycles {
                     executed: 3,
                     not_executed: 2,

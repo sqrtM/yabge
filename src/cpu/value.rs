@@ -6,6 +6,16 @@ pub enum Value {
     SixteenBit(u16),
 }
 
+pub fn concat_values(hi: Value, lo: Value) -> Value {
+    match (hi, lo) {
+        (Value::EightBit(hi_val), Value::EightBit(lo_val)) => {
+            let concatenated = ((hi_val as u16) << 8) | lo_val as u16;
+            Value::SixteenBit(concatenated)
+        }
+        _ => panic!("Invalid concatenation arguments."),
+    }
+}
+
 impl Add<Value> for Value {
     type Output = Value;
 
