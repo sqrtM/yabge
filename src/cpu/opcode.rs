@@ -1,10 +1,13 @@
+use crate::cpu::arithmetic::unsigned_to_signed;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
+use crate::cpu::instruction::BitAddr::{Four, One, Three, Two, Zero};
+use crate::cpu::instruction::Condition::{FlagOff, FlagOn};
 use crate::cpu::instruction::{
     AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
 use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, L, PC, SP};
-use crate::cpu::value::Value;
+use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
@@ -1342,6 +1345,57 @@ impl CPU {
                 cycles: 1,
                 length: InstructionLength::One,
             },
+            // RET NZ
+            0xC0 => Instruction::Ret(FlagOff(Z)),
+            // POP BC
+            0xC1 => Instruction::Pop(BC),
+            // JP NZ, a16
+            0xC2 => Instruction::Jp {
+                to: self.immediate_operand(true),
+                condition: FlagOff(Z),
+                cycles: JumpCycles {
+                    executed: 4,
+                    not_executed: 3,
+                },
+                length: InstructionLength::Three,
+            },
+            // JP a16
+            0xC3 => Instruction::Jp {
+                to: self.immediate_operand(true),
+                condition: Condition::None,
+                cycles: JumpCycles {
+                    executed: 4,
+                    not_executed: 4,
+                },
+                length: InstructionLength::Three,
+            },
+            // CALL NZ, a16
+            0xC4 => Instruction::Call(FlagOff(Z)),
+            // PUSH BC
+            0xC5 => Instruction::Push(BC),
+            // ADD A, d8
+            0xC6 => Instruction::Add {
+                to: MemoryLocation::Register(A),
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 0
+            0xC7 => Instruction::Rst(Zero),
+            // RET Z
+            0xC8 => Instruction::Ret(FlagOn(Z)),
+            // RET
+            0xC9 => Instruction::Ret(Condition::None),
+            // JP Z, a16
+            0xCA => Instruction::Jp {
+                to: self.immediate_operand(true),
+                condition: FlagOn(Z),
+                cycles: JumpCycles {
+                    executed: 4,
+                    not_executed: 3,
+                },
+                length: InstructionLength::Three,
+            },
             // Prefixed Ops
             0xCB => {
                 if let Value::EightBit(postfix) = self.read(self.registers.get(PC) + 1u16, false) {
@@ -1608,6 +1662,110 @@ impl CPU {
                     panic!("Invalid Postfix OpCode value!")
                 }
             }
+            // CALL Z, a16
+            0xCC => Instruction::Call(FlagOn(Z)),
+            // CALL a16
+            0xCD => Instruction::Call(Condition::None),
+            // ADC A, d8
+            0xCE => Instruction::Adc {
+                to: MemoryLocation::Register(A),
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 1
+            0xCF => Instruction::Rst(One),
+            // RET CZ
+            0xD0 => Instruction::Ret(FlagOff(Flag::C)),
+            // POP DE
+            0xD1 => Instruction::Pop(DE),
+            // JP NC, a16
+            0xD2 => Instruction::Jp {
+                to: self.immediate_operand(true),
+                condition: FlagOff(Flag::C),
+                cycles: JumpCycles {
+                    executed: 4,
+                    not_executed: 3,
+                },
+                length: InstructionLength::Three,
+            },
+            // NO CODE
+            0xD3 => panic!("Called 0xD3."),
+            // CALL NC, a16
+            0xD4 => Instruction::Call(FlagOff(Flag::C)),
+            // PUSH DE
+            0xD5 => Instruction::Push(DE),
+            // SUB d8
+            0xD6 => Instruction::Sub {
+                from: MemoryLocation::Register(A),
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 2
+            0xD7 => Instruction::Rst(Two),
+            // RET C
+            0xD8 => Instruction::Ret(FlagOn(Flag::C)),
+            // RETI
+            0xD9 => Instruction::Reti,
+            // JP C, a16
+            0xDA => Instruction::Jp {
+                to: self.immediate_operand(true),
+                condition: FlagOn(Flag::C),
+                cycles: JumpCycles {
+                    executed: 4,
+                    not_executed: 3,
+                },
+                length: InstructionLength::Three,
+            },
+            // NO CODE
+            0xDB => panic!("Called 0xDB."),
+            // CALL C, a16
+            0xDC => Instruction::Call(FlagOn(Flag::C)),
+            // SBC A, d8
+            0xDE => Instruction::Sbc {
+                from: MemoryLocation::Register(A),
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 3
+            0xDF => Instruction::Rst(Three),
+            // LD (a8), A
+            // INTERNAL PORT/MODE SWITCH
+            0xE0 => Instruction::Load {
+                to: MemoryLocation::Pointer(concat_values(
+                    Value::EightBit(0xFF),
+                    self.immediate_operand(false),
+                )),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 3,
+                length: InstructionLength::Two,
+            },
+            0xE1 => Instruction::Pop(HL),
+            // LD (C), A
+            // INTERNAL PORT/MODE SWITCH
+            0xE2 => Instruction::Load {
+                to: MemoryLocation::Pointer(concat_values(
+                    Value::EightBit(0xFF),
+                    self.registers.get(C),
+                )),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // PUSH HL
+            0xE5 => Instruction::Push(HL),
+            // AND D8
+            0xE6 => Instruction::And {
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 4
+            0xE7 => Instruction::Rst(Four),
             _ => Instruction::Nop,
         }
     }

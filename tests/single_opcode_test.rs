@@ -458,6 +458,94 @@ fn test_0x37() {
 }
 
 #[test]
+fn test_0xc2() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xC2));
+
+    // Equivalent to:
+    // cpu.write(Value::SixteenBit(0x0001), Value::SixteenBit(0xABCD));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0xCD));
+    cpu.write(Value::SixteenBit(0x0002), Value::EightBit(0xAB));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0xABCD));
+}
+
+#[test]
+fn test_0xc4() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(SP, Value::SixteenBit(0x1010));
+    cpu.registers.set(PC, Value::SixteenBit(0xABCD)); // +3 = 0xABD0
+
+    cpu.write(Value::SixteenBit(0xABCD), Value::EightBit(0xC4));
+    cpu.write(Value::SixteenBit(0xABCE), Value::EightBit(0x34));
+    cpu.write(Value::SixteenBit(0xABCF), Value::EightBit(0x12));
+
+    let val = cpu.read(cpu.registers.get(PC), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+
+    assert_eq!(cpu.registers.get(PC), Value::SixteenBit(0x1234));
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0x100F), false),
+        Value::EightBit(0xAB)
+    );
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0x100E), false),
+        Value::EightBit(0xD0)
+    );
+}
+
+#[test]
+fn test_0xe0() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0xABCD));
+    cpu.registers.set(A, Value::EightBit(0xCC));
+
+    cpu.write(Value::SixteenBit(0xABCD), Value::EightBit(0xE0));
+    cpu.write(Value::SixteenBit(0xABCE), Value::EightBit(0x34));
+
+    let val = cpu.read(cpu.registers.get(PC), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFF34), false),
+        Value::EightBit(0xCC)
+    );
+}
+
+#[test]
+fn test_0xe2() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(PC, Value::SixteenBit(0xABCD));
+    cpu.registers.set(A, Value::EightBit(0xCC));
+    cpu.registers.set(C, Value::EightBit(0xDD));
+
+    cpu.write(Value::SixteenBit(0xABCD), Value::EightBit(0xE2));
+
+    let val = cpu.read(cpu.registers.get(PC), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFFDD), false),
+        Value::EightBit(0xCC)
+    );
+}
+
+#[test]
 fn test_0xcb06() {
     let mut cpu: CPU = Default::default();
     cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
