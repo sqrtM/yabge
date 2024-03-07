@@ -1,12 +1,12 @@
 use crate::cpu::arithmetic::unsigned_to_signed;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
-use crate::cpu::instruction::BitAddr::{Four, One, Three, Two, Zero};
+use crate::cpu::instruction::BitAddr::{Five, Four, One, Six, Three, Two, Zero};
 use crate::cpu::instruction::Condition::{FlagOff, FlagOn};
 use crate::cpu::instruction::{
     AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
 };
-use crate::cpu::registers::Register::{A, B, BC, C, D, DE, E, H, HL, L, PC, SP};
+use crate::cpu::registers::Register::{A, AF, B, BC, C, D, DE, E, H, HL, L, PC, SP};
 use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
 
@@ -1766,6 +1766,88 @@ impl CPU {
             },
             // RST 4
             0xE7 => Instruction::Rst(Four),
+            // ADD SP, s8
+            0xE8 => todo!("Doing this one last."),
+            // JP HL
+            0xE9 => Instruction::Jp {
+                to: self.registers.get(HL),
+                condition: Condition::None,
+                cycles: JumpCycles {
+                    executed: 1,
+                    not_executed: 1,
+                },
+                length: InstructionLength::One,
+            },
+            // LD (a16), A
+            0xEA => Instruction::Load {
+                to: MemoryLocation::Pointer(self.immediate_operand(true)),
+                what: self.registers.get(A),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 4,
+                length: InstructionLength::Three,
+            },
+            // NO CODE
+            0xEB => panic!("Called 0xEB."),
+            // NO CODE
+            0xEC => panic!("Called 0xEC."),
+            // NO CODE
+            0xED => panic!("Called 0xED."),
+            // XOR d8
+            0xEE => Instruction::Xor {
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 5
+            0xEF => Instruction::Rst(Five),
+            // LD A, (a8)
+            // INTERNAL PORT/MODE SWITCH
+            0xF0 => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(
+                    concat_values(Value::EightBit(0xFF), self.immediate_operand(false)),
+                    false,
+                ),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 3,
+                length: InstructionLength::Two,
+            },
+            // POP AF
+            0xF1 => Instruction::Pop(AF),
+            // LD (A), C
+            // INTERNAL PORT/MODE SWITCH
+            0xF2 => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(
+                    concat_values(Value::EightBit(0xFF), self.registers.get(C)),
+                    false,
+                ),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // DI
+            0xF3 => Instruction::Di,
+            // NO CODE
+            0xF4 => panic!("called 0xF4"),
+            // PUSH AF
+            0xF5 => Instruction::Push(AF),
+            // OR d8
+            0xF6 => Instruction::Or {
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 6
+            0xF7 => Instruction::Rst(Six),
+            // LD HL, SP+s8
+            0xF8 => Instruction::Load {
+                to: MemoryLocation::Register(HL),
+                what: self.registers.get(SP) + unsigned_to_signed(self.immediate_operand(false)),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 3,
+                length: InstructionLength::Two,
+            },
             _ => Instruction::Nop,
         }
     }
