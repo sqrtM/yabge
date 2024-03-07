@@ -1,6 +1,6 @@
 use crate::cpu::arithmetic::unsigned_to_signed;
 use crate::cpu::flag::Flag;
-use crate::cpu::flag::Flag::{C, H, N};
+use crate::cpu::flag::Flag::{C, H, N, Z};
 use crate::cpu::registers::Register;
 use crate::cpu::registers::Register::{A, HL, PC, SP};
 use crate::cpu::value::{concat_values, Value};
@@ -28,7 +28,7 @@ pub enum AdditionalInstruction {
     None,
 }
 
-pub enum RstAddress {
+pub enum BitAddr {
     Zero,
     One,
     Two,
@@ -39,17 +39,30 @@ pub enum RstAddress {
     Seven,
 }
 
-impl RstAddress {
+impl BitAddr {
     fn new_pc(&self) -> Value {
         match self {
-            RstAddress::Zero => Value::SixteenBit(0x0000),
-            RstAddress::One => Value::SixteenBit(0x0008),
-            RstAddress::Two => Value::SixteenBit(0x0010),
-            RstAddress::Three => Value::SixteenBit(0x0018),
-            RstAddress::Four => Value::SixteenBit(0x0020),
-            RstAddress::Five => Value::SixteenBit(0x0028),
-            RstAddress::Six => Value::SixteenBit(0x0030),
-            RstAddress::Seven => Value::SixteenBit(0x0038),
+            BitAddr::Zero => Value::SixteenBit(0x0000),
+            BitAddr::One => Value::SixteenBit(0x0008),
+            BitAddr::Two => Value::SixteenBit(0x0010),
+            BitAddr::Three => Value::SixteenBit(0x0018),
+            BitAddr::Four => Value::SixteenBit(0x0020),
+            BitAddr::Five => Value::SixteenBit(0x0028),
+            BitAddr::Six => Value::SixteenBit(0x0030),
+            BitAddr::Seven => Value::SixteenBit(0x0038),
+        }
+    }
+
+    fn to_u8(&self) -> u8 {
+        match self {
+            BitAddr::Zero => 0,
+            BitAddr::One => 1,
+            BitAddr::Two => 2,
+            BitAddr::Three => 3,
+            BitAddr::Four => 4,
+            BitAddr::Five => 5,
+            BitAddr::Six => 6,
+            BitAddr::Seven => 7,
         }
     }
 }
@@ -141,6 +154,10 @@ pub enum Instruction {
         cycles: u8,
         length: InstructionLength,
     },
+    Bit {
+        what: MemoryLocation,
+        bit: BitAddr,
+    },
     Daa,
     Cpl,
     Scf,
@@ -150,7 +167,7 @@ pub enum Instruction {
     Pop(Register),
     Push(Register),
     Call(Condition),
-    Rst(RstAddress),
+    Rst(BitAddr),
     Ei,
     Di,
     Nop,
@@ -521,6 +538,29 @@ impl CPU {
                 }
                 self.inc_clock(1);
                 self.registers.inc_pc(1);
+            }
+            Instruction::Bit { what, bit } => {
+                let is_one = match what {
+                    MemoryLocation::Register(reg) => {
+                        self.inc_clock(2);
+                        self.registers.get(reg) & Value::EightBit(1 << bit.to_u8())
+                            != Value::EightBit(0)
+                    }
+                    MemoryLocation::Pointer(addr) => {
+                        self.inc_clock(3);
+                        self.read(addr, false) & Value::EightBit(1 << bit.to_u8())
+                            != Value::EightBit(0)
+                    }
+                };
+                if is_one {
+                    self.registers.f.unset(Z)
+                } else {
+                    self.registers.f.set(Z)
+                }
+                // Always set half carry
+                self.registers.f.set(H);
+                self.registers.f.unset(N);
+                self.registers.inc_pc(2);
             }
             Instruction::Ret(condition) => {
                 if self.condition_passes(condition) {

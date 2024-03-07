@@ -1,8 +1,9 @@
 use yabge::cpu::flag::Flag::{C, H, N, Z};
+use yabge::cpu::instruction::BitAddr::{Five, Six, Three, Two};
 use yabge::cpu::instruction::Condition::FlagOn;
-use yabge::cpu::instruction::RstAddress::{Three, Two};
 use yabge::cpu::instruction::{
-    AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
+    AdditionalInstruction, BitAddr, Condition, Instruction, InstructionLength, JumpCycles,
+    RotateDirection,
 };
 use yabge::cpu::registers::Register;
 use yabge::cpu::registers::Register::{A, AF, B, BC, HL, PC, SP};
@@ -840,4 +841,30 @@ fn test_di() {
     let instruction = Instruction::Di;
     cpu.execute(instruction);
     assert!(!cpu.ime());
+}
+
+#[test]
+fn test_bit() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b0010_0000));
+
+    let instruction = Instruction::Bit {
+        what: MemoryLocation::Register(A),
+        bit: Six,
+    };
+    cpu.execute(instruction);
+    assert!(cpu.registers.f.is_set(Z));
+
+    // -- // -- // -- // -- //
+
+    let mut cpu: CPU = Default::default();
+    cpu.registers.f.set(Z);
+    cpu.registers.set(HL, Value::SixteenBit(0xFACE));
+    cpu.write(Value::SixteenBit(0xFACE), Value::EightBit(0b0000_1000));
+    let instruction = Instruction::Bit {
+        what: MemoryLocation::Pointer(cpu.registers.get(HL)),
+        bit: Three,
+    };
+    cpu.execute(instruction);
+    assert!(!cpu.registers.f.is_set(Z));
 }
