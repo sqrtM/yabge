@@ -868,3 +868,32 @@ fn test_bit() {
     cpu.execute(instruction);
     assert!(!cpu.registers.f.is_set(Z));
 }
+
+#[test]
+fn test_res() {
+    let mut cpu: CPU = Default::default();
+    cpu.registers.set(A, Value::EightBit(0b0110_0110));
+
+    let instruction = Instruction::Res {
+        what: MemoryLocation::Register(A),
+        bit: Six,
+    };
+    cpu.execute(instruction);
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b0010_0110));
+
+    // -- // -- // -- // -- //
+
+    let mut cpu: CPU = Default::default();
+    cpu.registers.f.set(Z);
+    cpu.registers.set(HL, Value::SixteenBit(0xFACE));
+    cpu.write(Value::SixteenBit(0xFACE), Value::EightBit(0b1110_1011));
+    let instruction = Instruction::Res {
+        what: MemoryLocation::Pointer(cpu.registers.get(HL)),
+        bit: Three,
+    };
+    cpu.execute(instruction);
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xFACE), false),
+        Value::EightBit(0b1110_0011)
+    );
+}

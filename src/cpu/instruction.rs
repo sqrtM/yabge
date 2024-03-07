@@ -158,6 +158,10 @@ pub enum Instruction {
         what: MemoryLocation,
         bit: BitAddr,
     },
+    Res {
+        what: MemoryLocation,
+        bit: BitAddr,
+    },
     Daa,
     Cpl,
     Scf,
@@ -560,6 +564,21 @@ impl CPU {
                 // Always set half carry
                 self.registers.f.set(H);
                 self.registers.f.unset(N);
+                self.registers.inc_pc(2);
+            }
+            Instruction::Res { what, bit } => {
+                match what {
+                    MemoryLocation::Register(reg) => {
+                        let result = self.registers.get(reg) & !Value::EightBit(1 << bit.to_u8());
+                        self.registers.set(reg, result);
+                        self.inc_clock(2);
+                    }
+                    MemoryLocation::Pointer(addr) => {
+                        let result = self.read(addr, false) & !Value::EightBit(1 << bit.to_u8());
+                        self.write(addr, result);
+                        self.inc_clock(4);
+                    }
+                };
                 self.registers.inc_pc(2);
             }
             Instruction::Ret(condition) => {
