@@ -3,9 +3,7 @@ use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::BitAddr::{Five, Four, One, Six, Three, Two, Zero};
 use crate::cpu::instruction::Condition::{FlagOff, FlagOn};
-use crate::cpu::instruction::{
-    AdditionalInstruction, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection,
-};
+use crate::cpu::instruction::{AdditionalInstruction, BitAddr, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection};
 use crate::cpu::registers::Register::{A, AF, B, BC, C, D, DE, E, H, HL, L, PC, SP};
 use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
@@ -1851,6 +1849,36 @@ impl CPU {
                 cycles: 3,
                 length: InstructionLength::Two,
             },
+            // LD SP, HL
+            0xF9 => Instruction::Load {
+                to: MemoryLocation::Register(SP),
+                what: self.registers.get(HL),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 2,
+                length: InstructionLength::One,
+            },
+            // LD A, (a16)
+            0xFA => Instruction::Load {
+                to: MemoryLocation::Register(A),
+                what: self.read(self.immediate_operand(true), false),
+                additional_instruction: AdditionalInstruction::None,
+                cycles: 3,
+                length: InstructionLength::Three,
+            },
+            // EI
+            0xFB => Instruction::Ei,
+            // NO CODE
+            0xFC => panic!("called 0xFC"),
+            // NO CODE
+            0xFD => Instruction::Nop,
+            // CP d8
+            0xFE => Instruction::Cp {
+                what: self.immediate_operand(false),
+                cycles: 2,
+                length: InstructionLength::Two,
+            },
+            // RST 7
+            0xFF => Instruction::Rst(BitAddr::Seven),
             _ => Instruction::Nop,
         }
     }
