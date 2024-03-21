@@ -181,15 +181,6 @@ pub enum Instruction {
     Nop,
 }
 
-pub enum PrefixedInstruction {
-    Sla,
-    Sra,
-    Swap,
-    Bit,
-    Res,
-    Set,
-}
-
 pub enum InstructionLength {
     One,
     Two,
@@ -238,12 +229,9 @@ impl CPU {
                 cycles,
                 length,
             } => {
-                match to {
-                    MemoryLocation::Register(reg) => {
-                        let result = self.add(self.registers.get(reg), what);
-                        self.registers.set(reg, result);
-                    }
-                    _ => panic!("NOT IMPLEMENTED!!!!"),
+                if let MemoryLocation::Register(reg) = to {
+                    let result = self.add(self.registers.get(reg), what);
+                    self.registers.set(reg, result);
                 };
                 self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
@@ -276,12 +264,9 @@ impl CPU {
                 cycles,
                 length,
             } => {
-                match from {
-                    MemoryLocation::Register(reg) => {
-                        let result = self.sub(self.registers.get(reg), what);
-                        self.registers.set(reg, result);
-                    }
-                    _ => panic!("NOT IMPLEMENTED!!!!"),
+                if let MemoryLocation::Register(reg) = from {
+                    let result = self.sub(self.registers.get(reg), what);
+                    self.registers.set(reg, result);
                 };
                 self.inc_clock(cycles);
                 self.registers.inc_pc(length.count());
