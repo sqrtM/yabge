@@ -1,4 +1,4 @@
-use crate::cpu::arithmetic::unsigned_to_signed;
+use crate::cpu::arithmetic::unsigned_to_signed_16;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::{C, H, N, Z};
 use crate::cpu::registers::Register;
@@ -403,7 +403,7 @@ impl CPU {
                 length,
             } => {
                 if self.condition_passes(condition) {
-                    let new_location = self.registers.get(PC) + unsigned_to_signed(how_far);
+                    let new_location = self.registers.get(PC) + unsigned_to_signed_16(how_far);
                     self.registers.set(PC, new_location);
                     self.inc_clock(cycles.executed);
                 } else {

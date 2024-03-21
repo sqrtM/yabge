@@ -582,6 +582,7 @@ fn test_0xf8() {
     }
 
     assert_eq!(cpu.registers.get(HL), Value::SixteenBit(0xCCDD) - 1u8);
+    assert_eq!(cpu.registers.get(HL), Value::SixteenBit(0xCCDC));
 
     // -- // -- // -- //
 

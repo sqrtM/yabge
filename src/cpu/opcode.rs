@@ -1,4 +1,4 @@
-use crate::cpu::arithmetic::unsigned_to_signed;
+use crate::cpu::arithmetic::unsigned_to_signed_8;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::BitAddr::{Five, Four, One, Six, Three, Two, Zero};
@@ -11,7 +11,7 @@ use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
 
 impl CPU {
-    pub fn lookup(&self, code: u8) -> Instruction {
+    pub fn lookup(&mut self, code: u8) -> Instruction {
         match code {
             // NOP
             0x00 => Instruction::Nop,
@@ -1843,7 +1843,10 @@ impl CPU {
             // LD HL, SP+s8
             0xF8 => Instruction::Load {
                 to: MemoryLocation::Register(HL),
-                what: self.registers.get(SP) + unsigned_to_signed(self.immediate_operand(false)),
+                what: self.add_signed(
+                    self.registers.get(SP),
+                    unsigned_to_signed_8(self.immediate_operand(false)),
+                ),
                 additional_instruction: AdditionalInstruction::None,
                 cycles: 3,
                 length: InstructionLength::Two,

@@ -247,6 +247,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_add() {
+        let a = Value::SixteenBit(0x0002);
+        let b = a + 2i8;
+        assert_eq!(b, Value::SixteenBit(0x0004));
+
+        let a = Value::EightBit(0x02);
+        let b = a + 2u16;
+        assert_eq!(b, Value::EightBit(0x04))
+    }
+
+    #[test]
     fn test_ror() {
         let a = Value::SixteenBit(0b0010_0010_0000_0001);
         let b = a.rotate_right();
