@@ -3,7 +3,10 @@ use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
 use crate::cpu::instruction::BitAddr::{Five, Four, One, Six, Three, Two, Zero};
 use crate::cpu::instruction::Condition::{FlagOff, FlagOn};
-use crate::cpu::instruction::{AdditionalInstruction, BitAddr, Condition, Instruction, InstructionLength, JumpCycles, RotateDirection};
+use crate::cpu::instruction::{
+    AdditionalInstruction, BitAddr, Condition, Instruction, InstructionLength, JumpCycles,
+    RotateDirection,
+};
 use crate::cpu::registers::Register::{A, AF, B, BC, C, D, DE, E, H, HL, L, PC, SP};
 use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
