@@ -10,5 +10,3 @@ path = "src/main.rs"
 [lib]
 name = "yabge"
 path = "src/lib.rs"
-
-[dependencies]

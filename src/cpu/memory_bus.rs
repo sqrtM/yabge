@@ -45,7 +45,7 @@ impl MemoryBus {
             0xFF00..=0xFF7F => self.io_registers[address as usize - 0xFF00],
             0xFF80..=0xFFFE => self.hram[address as usize - 0xFF80],
             0xFFFF => self.interrupt_enable,
-            _ => panic!("Invalid memory address: 0x{:04X}", address),
+            _ => 0,
         }
     }
 

@@ -20,7 +20,7 @@ pub struct CPU {
     clock: u64,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum MemoryLocation {
     Register(Register),
     Pointer(Value),

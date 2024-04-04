@@ -242,6 +242,20 @@ impl Value {
     }
 }
 
+impl Value {
+    pub fn extract(&self) -> u16 {
+        match *self {
+            Value::EightBit(val) => {
+                val as u16
+            },
+            Value::SixteenBit(val) => {
+                val
+            }
+            _ => panic!("Failed to extract value"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -2,7 +2,7 @@ use crate::cpu::flag::FlagRegister;
 use crate::cpu::value::Value;
 use crate::cpu::{concat_bytes, split_bytes};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Register {
     A,
     B,

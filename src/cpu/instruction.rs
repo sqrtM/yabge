@@ -6,28 +6,33 @@ use crate::cpu::registers::Register::{A, HL, PC, SP};
 use crate::cpu::value::{concat_values, Value};
 use crate::cpu::{MemoryLocation, CPU};
 
+#[derive(Debug)]
 pub enum RotateDirection {
     Right,
     Left,
 }
 
+#[derive(Debug)]
 pub enum Condition {
     FlagOn(Flag),
     FlagOff(Flag),
     None,
 }
 
+#[derive(Debug)]
 pub struct JumpCycles {
     pub executed: u8,
     pub not_executed: u8,
 }
 
+#[derive(Debug)]
 pub enum AdditionalInstruction {
     Inc,
     Dec,
     None,
 }
 
+#[derive(Debug)]
 pub enum BitAddr {
     Zero,
     One,
@@ -67,6 +72,7 @@ impl BitAddr {
     }
 }
 
+#[derive(Debug)]
 pub enum Instruction {
     Load {
         to: MemoryLocation,
@@ -181,6 +187,7 @@ pub enum Instruction {
     Nop,
 }
 
+#[derive(Debug)]
 pub enum InstructionLength {
     One,
     Two,
