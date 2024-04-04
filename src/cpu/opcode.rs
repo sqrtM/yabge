@@ -2185,6 +2185,326 @@ impl CPU {
                             what: MemoryLocation::Register(A),
                             bit: Seven,
                         },
+                        // RES 0, B
+                        0x80 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Zero,
+                        },
+                        // RES 0, C
+                        0x81 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Zero,
+                        },
+                        // RES 0, D
+                        0x82 => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Zero,
+                        },
+                        // Res 0, E
+                        0x83 => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Zero,
+                        },
+                        // Res 0, H
+                        0x84 => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Zero,
+                        },
+                        // RES 0, L
+                        0x85 => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Zero,
+                        },
+                        // RES 0, (HL)
+                        0x86 => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Zero,
+                        },
+                        // RES 0, A
+                        0x87 => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Zero,
+                        },
+                        // RES 1, B
+                        0x88 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: One,
+                        },
+                        // RES 1, C
+                        0x89 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: One,
+                        },
+                        // RES 1, D
+                        0x8A => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: One,
+                        },
+                        // RES 1, E
+                        0x8B => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: One,
+                        },
+                        // RES 1, H
+                        0x8C => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: One,
+                        },
+                        // RES 1, L
+                        0x8D => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: One,
+                        },
+                        // RES 1, (HL)
+                        0x8E => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: One,
+                        },
+                        // RES 1, A
+                        0x8F => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: One,
+                        },
+                        // RES 2, B
+                        0x90 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Two,
+                        },
+                        // RES 2, C
+                        0x91 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Two,
+                        },
+                        // RES 2, D
+                        0x92 => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Two,
+                        },
+                        // RES 2, E
+                        0x93 => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Two,
+                        },
+                        // RES 2, H
+                        0x94 => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Two,
+                        },
+                        // RES 2, L
+                        0x95 => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Two,
+                        },
+                        // RES 2, (HL)
+                        0x96 => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Two,
+                        },
+                        // RES 2, A
+                        0x97 => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Two,
+                        },
+                        // RES 3, B
+                        0x98 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Three,
+                        },
+                        // RES 3, C
+                        0x99 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Three,
+                        },
+                        // RES 3, D
+                        0x9A => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Three,
+                        },
+                        // RES 3, E
+                        0x9B => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Three,
+                        },
+                        // RES 3, H
+                        0x9C => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Three,
+                        },
+                        // RES 3, L
+                        0x9D => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Three,
+                        },
+                        // RES 3, (HL)
+                        0x9E => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Three,
+                        },
+                        // RES 3, A
+                        0x9F => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Three,
+                        },
+                        // RES 4, B
+                        0xA0 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Four,
+                        },
+                        // RES 4, C
+                        0xA1 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Four,
+                        },
+                        // RES 4, D
+                        0xA2 => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Four,
+                        },
+                        // RES 4, E
+                        0xA3 => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Four,
+                        },
+                        // RES 4, H
+                        0xA4 => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Four,
+                        },
+                        // RES 4, L
+                        0xA5 => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Four,
+                        },
+                        // RES 4, (HL)
+                        0xA6 => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Four,
+                        },
+                        // RES 4, A
+                        0xA7 => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Four,
+                        },
+                        // RES 5, B
+                        0xA8 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Five,
+                        },
+                        // RES 5, C
+                        0xA9 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Five,
+                        },
+                        // RES 5, D
+                        0xAA => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Five,
+                        },
+                        // RES 5, E
+                        0xAB => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Five,
+                        },
+                        // RES 5, H
+                        0xAC => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Five,
+                        },
+                        // RES 5, L
+                        0xAD => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Five,
+                        },
+                        // RES 5, (HL)
+                        0xAE => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Five,
+                        },
+                        // RES 5, A
+                        0xAF => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Five,
+                        },
+                        // RES 6, B
+                        0xB0 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Six,
+                        },
+                        // RES 6, C
+                        0xB1 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Six,
+                        },
+                        // RES 6, D
+                        0xB2 => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Six,
+                        },
+                        // RES 6, E
+                        0xB3 => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Six,
+                        },
+                        // RES 6, H
+                        0xB4 => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Six,
+                        },
+                        // RES 6, L
+                        0xB5 => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Six,
+                        },
+                        // RES 6, (HL)
+                        0xB6 => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Six,
+                        },
+                        // RES 6, A
+                        0xB7 => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Six,
+                        },
+                        // RES 7, B
+                        0xB8 => Instruction::Res {
+                            what: MemoryLocation::Register(B),
+                            bit: Seven,
+                        },
+                        // RES 7, C
+                        0xB9 => Instruction::Res {
+                            what: MemoryLocation::Register(C),
+                            bit: Seven,
+                        },
+                        // RES 7, D
+                        0xBA => Instruction::Res {
+                            what: MemoryLocation::Register(D),
+                            bit: Seven,
+                        },
+                        // RES 7, E
+                        0xBB => Instruction::Res {
+                            what: MemoryLocation::Register(E),
+                            bit: Seven,
+                        },
+                        // RES 7, H
+                        0xBC => Instruction::Res {
+                            what: MemoryLocation::Register(H),
+                            bit: Seven,
+                        },
+                        // RES 7, L
+                        0xBD => Instruction::Res {
+                            what: MemoryLocation::Register(L),
+                            bit: Seven,
+                        },
+                        // RES 7, (HL)
+                        0xBE => Instruction::Res {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Seven,
+                        },
+                        // RES 7, A
+                        0xBF => Instruction::Res {
+                            what: MemoryLocation::Register(A),
+                            bit: Seven,
+                        },
                         _ => Instruction::Nop,
                     }
                 } else {
