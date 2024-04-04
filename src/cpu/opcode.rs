@@ -1,7 +1,7 @@
 use crate::cpu::arithmetic::unsigned_to_signed_8;
 use crate::cpu::flag::Flag;
 use crate::cpu::flag::Flag::Z;
-use crate::cpu::instruction::BitAddr::{Five, Four, One, Six, Three, Two, Zero};
+use crate::cpu::instruction::BitAddr::{Five, Four, One, Seven, Six, Three, Two, Zero};
 use crate::cpu::instruction::Condition::{FlagOff, FlagOn};
 use crate::cpu::instruction::{
     AdditionalInstruction, BitAddr, Condition, Instruction, InstructionLength, JumpCycles,
@@ -1865,7 +1865,326 @@ impl CPU {
                             cycles: 2,
                             length: InstructionLength::Two,
                         },
-
+                        // BIT 0, B
+                        0x40 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Zero,
+                        },
+                        // BIT 0, C
+                        0x41 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Zero,
+                        },
+                        // BIT 0, D
+                        0x42 => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Zero,
+                        },
+                        // BIT 0, E
+                        0x43 => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Zero,
+                        },
+                        // BIT 0, H
+                        0x44 => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Zero,
+                        },
+                        // BIT 0, L
+                        0x45 => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Zero,
+                        },
+                        // BIT 0, (HL)
+                        0x46 => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Zero,
+                        },
+                        // BIT 0, A
+                        0x47 => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Zero,
+                        },
+                        // BIT 1, B
+                        0x48 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: One,
+                        },
+                        // BIT 1, C
+                        0x49 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: One,
+                        },
+                        // BIT 1, D
+                        0x4A => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: One,
+                        },
+                        // BIT 1, E
+                        0x4B => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: One,
+                        },
+                        // BIT 1, H
+                        0x4C => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: One,
+                        },
+                        // BIT 1, L
+                        0x4D => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: One,
+                        },
+                        // BIT 1, (HL)
+                        0x4E => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: One,
+                        },
+                        // BIT 1, A
+                        0x4F => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: One,
+                        },
+                        // BIT 2, B
+                        0x50 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Two,
+                        },
+                        // BIT 2, C
+                        0x51 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Two,
+                        },
+                        // BIT 2, D
+                        0x52 => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Two,
+                        },
+                        // BIT 2, E
+                        0x53 => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Two,
+                        },
+                        // BIT 2, H
+                        0x54 => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Two,
+                        },
+                        // BIT 2, L
+                        0x55 => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Two,
+                        },
+                        // BIT 2, (HL)
+                        0x56 => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Two,
+                        },
+                        // BIT 2, A
+                        0x57 => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Two,
+                        },
+                        // BIT 3, B
+                        0x58 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Three,
+                        },
+                        // BIT 3, C
+                        0x59 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Three,
+                        },
+                        // BIT 3, D
+                        0x5A => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Three,
+                        },
+                        // BIT 3, E
+                        0x5B => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Three,
+                        },
+                        // BIT 3, H
+                        0x5C => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Three,
+                        },
+                        // BIT 3, L
+                        0x5D => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Three,
+                        },
+                        // BIT 3, (HL)
+                        0x5E => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Three,
+                        },
+                        // BIT 3, A
+                        0x5F => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Three,
+                        },
+                        // BIT 4, B
+                        0x60 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Four,
+                        },
+                        // BIT 4, C
+                        0x61 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Four,
+                        },
+                        // BIT 4, D
+                        0x62 => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Four,
+                        },
+                        // BIT 4, E
+                        0x63 => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Four,
+                        },
+                        // BIT 4, H
+                        0x64 => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Four,
+                        },
+                        // BIT 4, L
+                        0x65 => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Four,
+                        },
+                        // BIT 4, (HL)
+                        0x66 => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Four,
+                        },
+                        // BIT 4, A
+                        0x67 => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Four,
+                        },
+                        // BIT 5, B
+                        0x68 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Five,
+                        },
+                        // BIT 5, C
+                        0x69 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Five,
+                        },
+                        // BIT 5, D
+                        0x6A => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Five,
+                        },
+                        // BIT 5, E
+                        0x6B => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Five,
+                        },
+                        // BIT 5, H
+                        0x6C => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Five,
+                        },
+                        // BIT 5, L
+                        0x6D => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Five,
+                        },
+                        // BIT 5, (HL)
+                        0x6E => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Five,
+                        },
+                        // BIT 5, A
+                        0x6F => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Five,
+                        },
+                        // BIT 6, B
+                        0x70 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Six,
+                        },
+                        // BIT 6, C
+                        0x71 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Six,
+                        },
+                        // BIT 6, D
+                        0x72 => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Six,
+                        },
+                        // BIT 6, E
+                        0x73 => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Six,
+                        },
+                        // BIT 6, H
+                        0x74 => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Six,
+                        },
+                        // BIT 6, L
+                        0x75 => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Six,
+                        },
+                        // BIT 6, (HL)
+                        0x76 => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Six,
+                        },
+                        // BIT 6, A
+                        0x77 => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Six,
+                        },
+                        // BIT 7, B
+                        0x78 => Instruction::Bit {
+                            what: MemoryLocation::Register(B),
+                            bit: Seven,
+                        },
+                        // BIT 7, C
+                        0x79 => Instruction::Bit {
+                            what: MemoryLocation::Register(C),
+                            bit: Seven,
+                        },
+                        // BIT 7, D
+                        0x7A => Instruction::Bit {
+                            what: MemoryLocation::Register(D),
+                            bit: Seven,
+                        },
+                        // BIT 7, E
+                        0x7B => Instruction::Bit {
+                            what: MemoryLocation::Register(E),
+                            bit: Seven,
+                        },
+                        // BIT 7, H
+                        0x7C => Instruction::Bit {
+                            what: MemoryLocation::Register(H),
+                            bit: Seven,
+                        },
+                        // BIT 7, L
+                        0x7D => Instruction::Bit {
+                            what: MemoryLocation::Register(L),
+                            bit: Seven,
+                        },
+                        // BIT 7, (HL)
+                        0x7E => Instruction::Bit {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Seven,
+                        },
+                        // BIT 7, A
+                        0x7F => Instruction::Bit {
+                            what: MemoryLocation::Register(A),
+                            bit: Seven,
+                        },
                         _ => Instruction::Nop,
                     }
                 } else {
