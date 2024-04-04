@@ -2505,6 +2505,326 @@ impl CPU {
                             what: MemoryLocation::Register(A),
                             bit: Seven,
                         },
+                        // SET 0, B
+                        0xC0 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Zero,
+                        },
+                        // SET 0, C
+                        0xC1 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Zero,
+                        },
+                        // SET 0, D
+                        0xC2 => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Zero,
+                        },
+                        // SET 0, E
+                        0xC3 => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Zero,
+                        },
+                        // SET 0, H
+                        0xC4 => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Zero,
+                        },
+                        // SET 0, L
+                        0xC5 => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Zero,
+                        },
+                        // SET 0, (HL)
+                        0xC6 => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Zero,
+                        },
+                        // SET 0, A
+                        0xC7 => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Zero,
+                        },
+                        // SET 1, B
+                        0xC8 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: One,
+                        },
+                        // SET 1, C
+                        0xC9 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: One,
+                        },
+                        // SET 1, D
+                        0xCA => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: One,
+                        },
+                        // SET 1, E
+                        0xCB => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: One,
+                        },
+                        // SET 1, H
+                        0xCC => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: One,
+                        },
+                        // SET 1, L
+                        0xCD => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: One,
+                        },
+                        // SET 1, (HL)
+                        0xCE => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: One,
+                        },
+                        // SET 1, A
+                        0xCF => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: One,
+                        },
+                        // SET 2, B
+                        0xD0 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Two,
+                        },
+                        // SET 2, C
+                        0xD1 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Two,
+                        },
+                        // SET 2, D
+                        0xD2 => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Two,
+                        },
+                        // SET 2, E
+                        0xD3 => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Two,
+                        },
+                        // SET 2, H
+                        0xD4 => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Two,
+                        },
+                        // SET 2, L
+                        0xD5 => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Two,
+                        },
+                        // SET 2, (HL)
+                        0xD6 => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Two,
+                        },
+                        // SET 2, A
+                        0xD7 => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Two,
+                        },
+                        // SET 3, B
+                        0xD8 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Three,
+                        },
+                        // SET 3, C
+                        0xD9 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Three,
+                        },
+                        // SET 3, D
+                        0xDA => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Three,
+                        },
+                        // SET 3, E
+                        0xDB => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Three,
+                        },
+                        // SET 3, H
+                        0xDC => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Three,
+                        },
+                        // SET 3, L
+                        0xDD => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Three,
+                        },
+                        // SET 3, (HL)
+                        0xDE => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Three,
+                        },
+                        // SET 3, A
+                        0xDF => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Three,
+                        },
+                        // SET 4, B
+                        0xE0 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Four,
+                        },
+                        // SET 4, C
+                        0xE1 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Four,
+                        },
+                        // SET 4, D
+                        0xE2 => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Four,
+                        },
+                        // SET 4, E
+                        0xE3 => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Four,
+                        },
+                        // SET 4, H
+                        0xE4 => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Four,
+                        },
+                        // SET 4, L
+                        0xE5 => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Four,
+                        },
+                        // SET 4, (HL)
+                        0xE6 => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Four,
+                        },
+                        // SET 4, A
+                        0xE7 => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Four,
+                        },
+                        // SET 5, B
+                        0xE8 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Five,
+                        },
+                        // SET 5, C
+                        0xE9 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Five,
+                        },
+                        // SET 5, D
+                        0xEA => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Five,
+                        },
+                        // SET 5, E
+                        0xEB => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Five,
+                        },
+                        // SET 5, H
+                        0xEC => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Five,
+                        },
+                        // SET 5, L
+                        0xED => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Five,
+                        },
+                        // SET 5, (HL)
+                        0xEE => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Five,
+                        },
+                        // SET 5, A
+                        0xEF => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Five,
+                        },
+                        // SET 6, B
+                        0xF0 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Six,
+                        },
+                        // SET 6, C
+                        0xF1 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Six,
+                        },
+                        // SET 6, D
+                        0xF2 => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Six,
+                        },
+                        // SET 6, E
+                        0xF3 => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Six,
+                        },
+                        // SET 6, H
+                        0xF4 => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Six,
+                        },
+                        // SET 6, L
+                        0xF5 => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Six,
+                        },
+                        // SET 6, (HL)
+                        0xF6 => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Six,
+                        },
+                        // SET 6, A
+                        0xF7 => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Six,
+                        },
+                        // SET 7, B
+                        0xF8 => Instruction::Set {
+                            what: MemoryLocation::Register(B),
+                            bit: Seven,
+                        },
+                        // SET 7, C
+                        0xF9 => Instruction::Set {
+                            what: MemoryLocation::Register(C),
+                            bit: Seven,
+                        },
+                        // SET 7, D
+                        0xFA => Instruction::Set {
+                            what: MemoryLocation::Register(D),
+                            bit: Seven,
+                        },
+                        // SET 7, E
+                        0xFB => Instruction::Set {
+                            what: MemoryLocation::Register(E),
+                            bit: Seven,
+                        },
+                        // SET 7, H
+                        0xFC => Instruction::Set {
+                            what: MemoryLocation::Register(H),
+                            bit: Seven,
+                        },
+                        // SET 7, L
+                        0xFD => Instruction::Set {
+                            what: MemoryLocation::Register(L),
+                            bit: Seven,
+                        },
+                        // SET 7, (HL)
+                        0xFE => Instruction::Set {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            bit: Seven,
+                        },
+                        // SET 7, A
+                        0xFF => Instruction::Set {
+                            what: MemoryLocation::Register(A),
+                            bit: Seven,
+                        },
                         _ => Instruction::Nop,
                     }
                 } else {
