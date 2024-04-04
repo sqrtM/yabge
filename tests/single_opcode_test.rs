@@ -702,3 +702,78 @@ fn test_0xcb1e() {
     );
     assert!(!cpu.registers.f.is_set(Flag::C))
 }
+
+#[test]
+fn test_0xcb26() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x26));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+    cpu.registers.f.set(Flag::C);
+    cpu.write(Value::SixteenBit(0xCAFE), Value::EightBit(0b0101_1110));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xCAFE), false),
+        Value::EightBit(0b1011_1100)
+    );
+    assert!(!cpu.registers.f.is_set(Flag::C))
+}
+
+#[test]
+fn test_0xcb27() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x27));
+    cpu.registers.set(A, Value::EightBit(0b0101_1110));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(cpu.registers.get(A), Value::EightBit(0b1011_1100));
+    assert!(!cpu.registers.f.is_set(Flag::C))
+}
+
+#[test]
+fn test_0xcb35() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x35));
+
+    cpu.registers.set(L, Value::EightBit(0b0101_1110));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(cpu.registers.get(L), Value::EightBit(0b1110_0101));
+}
+
+#[test]
+fn test_0xcb36() {
+    let mut cpu: CPU = Default::default();
+    cpu.write(Value::SixteenBit(0x0000), Value::EightBit(0xCB));
+    cpu.write(Value::SixteenBit(0x0001), Value::EightBit(0x36));
+
+    cpu.registers.set(HL, Value::SixteenBit(0xCAFE));
+    cpu.registers.f.set(Flag::C);
+    cpu.write(Value::SixteenBit(0xCAFE), Value::EightBit(0b0101_1110));
+
+    let val = cpu.read(Value::SixteenBit(0x00), false);
+    if let Value::EightBit(code) = val {
+        let inst = cpu.lookup(code);
+        cpu.execute(inst);
+    }
+    assert_eq!(
+        cpu.read(Value::SixteenBit(0xCAFE), false),
+        Value::EightBit(0b1110_0101)
+    );
+}

@@ -1657,6 +1657,215 @@ impl CPU {
                             cycles: 2,
                             length: InstructionLength::Two,
                         },
+                        // SLA B
+                        0x20 => Instruction::Shift {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA C
+                        0x21 => Instruction::Shift {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA D
+                        0x22 => Instruction::Shift {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA E
+                        0x23 => Instruction::Shift {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA H
+                        0x24 => Instruction::Shift {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA L
+                        0x25 => Instruction::Shift {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA (HL)
+                        0x26 => Instruction::Shift {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SLA A
+                        0x27 => Instruction::Shift {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Left,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA B
+                        0x28 => Instruction::Shift {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA C
+                        0x29 => Instruction::Shift {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA D
+                        0x2A => Instruction::Shift {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA E
+                        0x2B => Instruction::Shift {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA H
+                        0x2C => Instruction::Shift {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA L
+                        0x2D => Instruction::Shift {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA (HL)
+                        0x2E => Instruction::Shift {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRA A
+                        0x2F => Instruction::Shift {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Right,
+                            arithmetic: true,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SWAP B
+                        0x30 => Instruction::Swap(MemoryLocation::Register(B)),
+                        // SWAP C
+                        0x31 => Instruction::Swap(MemoryLocation::Register(C)),
+                        // SWAP D
+                        0x32 => Instruction::Swap(MemoryLocation::Register(D)),
+                        // SWAP E
+                        0x33 => Instruction::Swap(MemoryLocation::Register(E)),
+                        // SWAP H
+                        0x34 => Instruction::Swap(MemoryLocation::Register(H)),
+                        // SWAP L
+                        0x35 => Instruction::Swap(MemoryLocation::Register(L)),
+                        // SWAP (HL)
+                        0x36 => Instruction::Swap(MemoryLocation::Pointer(self.registers.get(HL))),
+                        // SWAP A
+                        0x37 => Instruction::Swap(MemoryLocation::Register(A)),
+                        // SRL B
+                        0x38 => Instruction::Shift {
+                            what: MemoryLocation::Register(B),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL C
+                        0x39 => Instruction::Shift {
+                            what: MemoryLocation::Register(C),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL D
+                        0x3A => Instruction::Shift {
+                            what: MemoryLocation::Register(D),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL E
+                        0x3B => Instruction::Shift {
+                            what: MemoryLocation::Register(E),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL H
+                        0x3C => Instruction::Shift {
+                            what: MemoryLocation::Register(H),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL L
+                        0x3D => Instruction::Shift {
+                            what: MemoryLocation::Register(L),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL (HL)
+                        0x3E => Instruction::Shift {
+                            what: MemoryLocation::Pointer(self.registers.get(HL)),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+                        // SRL A
+                        0x3F => Instruction::Shift {
+                            what: MemoryLocation::Register(A),
+                            direction: RotateDirection::Right,
+                            arithmetic: false,
+                            cycles: 2,
+                            length: InstructionLength::Two,
+                        },
+
                         _ => Instruction::Nop,
                     }
                 } else {
